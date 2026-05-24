@@ -1,0 +1,149 @@
+<!-- Навигация -->
+<div class="detail-nav">
+  <p-button label="Назад к списку" icon="pi pi-arrow-left" severity="secondary" text (onClick)="back()" />
+  @if (!loading() && plan()) {
+    <div class="detail-nav-actions">
+      <p-button label="Удалить план" icon="pi pi-trash" severity="danger" text
+                [loading]="deleting()" (onClick)="confirmVisible.set(true)" />
+    </div>
+  }
+</div>
+
+<!-- Confirm удаления -->
+<ui-confirm-delete
+  [visible]="confirmVisible()"
+  [entity]="'план развития: ' + employeeName()"
+  (confirm)="confirmDelete()"
+  (cancel)="confirmVisible.set(false)" />
+
+@if (loading()) {
+  <div class="detail-skeleton">
+    <div class="sk-hero">
+      <p-skeleton shape="circle" size="96px" />
+      <div class="sk-hero-text">
+        <p-skeleton width="260px" height="28px" />
+        <p-skeleton width="180px" height="18px" styleClass="mt-8" />
+        <p-skeleton width="100px" height="22px" styleClass="mt-8" />
+      </div>
+    </div>
+    <div class="sk-cards">
+      @for (i of [1,2,3]; track i) {
+        <div class="card sk-card">
+          <p-skeleton width="120px" height="16px" />
+          @for (j of [1,2,3,4]; track j) {
+            <div class="sk-row">
+              <p-skeleton width="100px" height="13px" />
+              <p-skeleton width="160px" height="13px" />
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}
+
+@if (!loading() && plan(); as p) {
+  <!-- Hero -->
+  <div class="detail-hero card">
+    <div class="hero-left">
+      @if (p.employee?.image) {
+        <img class="hero-photo" [src]="p.employee?.image" [alt]="employeeName()" />
+      } @else {
+        <p-avatar [label]="ini(p.employee)" shape="circle" styleClass="hero-avatar" />
+      }
+      <div class="hero-info">
+        <h1 class="hero-name">{{ employeeName() }}</h1>
+        <div class="hero-position muted">План развития · {{ p.year }}</div>
+        <div class="hero-badges">
+          <p-tag [value]="label(p.status)" [severity]="tagSeverity(p.status)" [rounded]="true" />
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-progress">
+      <div class="muted text-sm">Прогресс</div>
+      <p-progressBar [value]="progressValue()" [showValue]="false" styleClass="plan-bar" />
+      <div class="muted text-sm">{{ itemsDone() }}/{{ itemsTotal() }} пунктов · {{ progressValue() }}%</div>
+    </div>
+  </div>
+
+  <!-- Info cards -->
+  <div class="detail-grid">
+    <!-- План -->
+    <div class="card info-card">
+      <div class="card-header"><h3>Параметры плана</h3></div>
+      <div class="card-body info-list">
+        <div class="info-row"><span>Год</span><b>{{ p.year }}</b></div>
+        <div class="info-row"><span>Статус</span><b>{{ label(p.status) }}</b></div>
+        <div class="info-row"><span>Дата начала</span><b>{{ fmt(p.startDate) }}</b></div>
+        <div class="info-row"><span>Дата окончания</span><b>{{ fmt(p.endDate) }}</b></div>
+        <div class="info-row"><span>Пунктов</span><b>{{ itemsDone() }} из {{ itemsTotal() }}</b></div>
+        <div class="info-row"><span>Создан</span><b>{{ fmt(p.createdAt) }}</b></div>
+        <div class="info-row"><span>Обновлён</span><b>{{ fmt(p.updatedAt) }}</b></div>
+      </div>
+    </div>
+
+    <!-- Участники -->
+    <div class="card info-card">
+      <div class="card-header"><h3>Участники</h3></div>
+      <div class="card-body info-list">
+        <div class="info-row"><span>Сотрудник</span><b>{{ fullName(p.employee) }}</b></div>
+        <div class="info-row"><span>Руководитель</span><b>{{ fullName(p.supervisor) }}</b></div>
+        <div class="info-row"><span>Создал</span><b>{{ fullName(p.createdBy) }}</b></div>
+      </div>
+    </div>
+
+    <!-- Описание -->
+    <div class="card info-card full-width">
+      <div class="card-header"><h3>Описание</h3></div>
+      <div class="card-body">
+        <p class="goal-text">{{ p.description || '—' }}</p>
+      </div>
+    </div>
+
+    <!-- Пункты плана -->
+    <div class="card info-card full-width">
+      <div class="card-header"><h3>Пункты плана ({{ itemsTotal() }})</h3></div>
+      <div class="card-body">
+        @for (it of p.items; track it.id) {
+          <div class="plan-item">
+            <div class="plan-item-head">
+              <div class="plan-item-title fw-600">{{ it.title }}</div>
+              <div class="plan-item-badges">
+                <app-task-priority-badge [priority]="it.priority" />
+                <p-tag [value]="itemStatusLabel(it.status)" [severity]="itemStatusSeverity(it.status)" [rounded]="true" />
+              </div>
+            </div>
+            <div class="plan-item-meta">
+              <span><i class="pi pi-user"></i> {{ fullName(it.assignee) }}</span>
+              <span><i class="pi pi-calendar"></i> {{ fmt(it.deadline) }}</span>
+              @if (it.participantDepartments) {
+                <span><i class="pi pi-sitemap"></i> {{ it.participantDepartments }}</span>
+              }
+              <span><i class="pi pi-comments"></i> {{ it.commentCount }}</span>
+            </div>
+            @if (it.expectedResult || it.actualResult) {
+              <div class="plan-item-results">
+                <div><span class="muted text-sm">Ожидаемый результат</span><div>{{ it.expectedResult || '—' }}</div></div>
+                <div><span class="muted text-sm">Фактический результат</span><div>{{ it.actualResult || '—' }}</div></div>
+              </div>
+            }
+          </div>
+        } @empty {
+          <p class="muted">Пунктов пока нет.</p>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+@if (!loading() && !plan()) {
+  <div class="empty-state" style="padding:80px 20px">
+    <div class="icon-wrap"><i class="pi pi-bullseye" style="font-size:24px"></i></div>
+    <h3>План развития не найден</h3>
+    <p>Возможно, запись была удалена или недоступна.</p>
+    <div style="margin-top:16px">
+      <p-button label="Вернуться к списку" icon="pi pi-arrow-left" severity="secondary" (onClick)="back()" />
+    </div>
+  </div>
+}

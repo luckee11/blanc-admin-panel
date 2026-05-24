@@ -1,8 +1,11 @@
-import { Injectable, inject } from '@angular/core';
-import { Observable, forkJoin, map, tap } from 'rxjs';
+import { Injectable, inject, signal } from '@angular/core';
+import { Observable, finalize, forkJoin, map, tap } from 'rxjs';
 import { IprApi } from './ipr.api';
 import { IprStore } from './ipr.store';
-import { IprPlan } from '../models/interfaces/ipr-plan.interface';
+import {
+  IprPlan,
+  SearchDevelopmentPlansRequest,
+} from '../models/interfaces/ipr-plan.interface';
 import { IprTask } from '../models/interfaces/ipr-task.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -11,10 +14,48 @@ export class IprFacade {
   private store = inject(IprStore);
 
   readonly plans = this.store.plans;
+  readonly developmentPlans = this.store.developmentPlans;
+  readonly plansPagination = this.store.plansPagination;
+  readonly selectedPlan = this.store.selectedPlan;
+  readonly selectedPlanLoading = this.store.selectedPlanLoading;
   readonly tasks = this.store.tasks;
+
+  private _plansLoading = signal(false);
+  readonly plansLoading = this._plansLoading.asReadonly();
 
   constructor() {
     this.loadAll().subscribe();
+  }
+
+  /** Загрузка планов развития с бэкенда (POST /api/admin/development-plans/search). */
+  searchDevelopmentPlans(req: SearchDevelopmentPlansRequest = {}): Observable<void> {
+    this._plansLoading.set(true);
+    return this.api.searchDevelopmentPlans(req).pipe(
+      tap((res) => this.store.setDevelopmentPlans(res)),
+      finalize(() => this._plansLoading.set(false)),
+      map(() => undefined),
+    );
+  }
+
+  /** Загрузка плана развития по id (GET /api/admin/development-plans/{id}). */
+  loadDevelopmentPlanById(id: string): Observable<void> {
+    this.store.setSelectedPlanLoading(true);
+    return this.api.getDevelopmentPlanById(id).pipe(
+      tap((plan) => this.store.setSelectedPlan(plan)),
+      finalize(() => this.store.setSelectedPlanLoading(false)),
+      map(() => undefined),
+    );
+  }
+
+  clearSelectedPlan(): void {
+    this.store.clearSelectedPlan();
+  }
+
+  /** Удаление плана развития (DELETE /api/admin/development-plans/{id}). */
+  deleteDevelopmentPlan(id: string): Observable<void> {
+    return this.api.deleteDevelopmentPlan(id).pipe(
+      tap(() => this.store.removeDevelopmentPlan(id)),
+    );
   }
 
   loadAll(): Observable<void> {

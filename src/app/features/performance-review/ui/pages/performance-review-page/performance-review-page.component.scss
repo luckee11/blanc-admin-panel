@@ -1,0 +1,15 @@
+.prim-table-card { overflow: hidden; }
+
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.table-count { margin-left: auto; }
+
+.empty-state {
+  padding: 48px 24px;
+  text-align: center;
+}

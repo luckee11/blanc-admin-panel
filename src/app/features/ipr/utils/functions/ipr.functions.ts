@@ -20,3 +20,26 @@ export function isOverdue(dueDate: string): boolean {
 export function calcProgress(tasksDone: number, tasksTotal: number): number {
   return tasksTotal ? Math.round((tasksDone / tasksTotal) * 100) : 0;
 }
+
+/* ===== Статусы пунктов плана развития (items[].status) ===== */
+const ITEM_STATUS_LABELS: Record<string, string> = {
+  backlog: 'Бэклог',
+  in_progress: 'В работе',
+  review: 'На проверке',
+  done: 'Выполнено',
+  completed: 'Выполнено',
+};
+
+const ITEM_STATUS_SEVERITY: Record<string, 'secondary' | 'info' | 'warn' | 'success' | 'danger'> = {
+  backlog: 'secondary',
+  in_progress: 'info',
+  review: 'warn',
+  done: 'success',
+  completed: 'success',
+};
+
+export function getItemStatusLabel(s: string): string { return ITEM_STATUS_LABELS[s] ?? s; }
+export function getItemStatusSeverity(s: string): 'secondary' | 'info' | 'warn' | 'success' | 'danger' {
+  return ITEM_STATUS_SEVERITY[s] ?? 'secondary';
+}
+export function isItemDone(s: string): boolean { return s === 'done' || s === 'completed'; }

@@ -3,7 +3,6 @@ import { Observable, finalize, forkJoin, map, tap } from 'rxjs';
 import { EmployeesApi } from './employees.api';
 import { EmployeesStore } from './employees.store';
 import { Employee } from '../models/interfaces/employee.interface';
-import { ADUser } from '../models/interfaces/ad-user.interface';
 import { Department } from '../models/interfaces/department.interface';
 import { Contact } from '../models/interfaces/contact.interface';
 import { Human, HumansSearchRequest, UpdateHumanRequest } from '../models/interfaces/human.interface';
@@ -89,7 +88,6 @@ export class EmployeesFacade {
 
   /* ===== Employees (mock CRUD) ===== */
   readonly employees   = this.store.employees;
-  readonly adUsers     = this.store.adUsers;
   readonly departments = this.store.departments;
   readonly contacts    = this.store.contacts;
 
@@ -100,13 +98,11 @@ export class EmployeesFacade {
   loadSupportData(): Observable<void> {
     return forkJoin([
       this.api.listEmployees(),
-      this.api.listADUsers(),
       this.api.listDepartments(),
       this.api.listContacts(),
     ]).pipe(
-      tap(([emps, ad, depts, contacts]) => {
+      tap(([emps, depts, contacts]) => {
         this.store.setEmployees(emps);
-        this.store.setADUsers(ad);
         this.store.setDepartments(depts);
         this.store.setContacts(contacts);
       }),
@@ -122,16 +118,6 @@ export class EmployeesFacade {
   }
   deleteEmployee(id: string): Observable<void> {
     return this.api.deleteEmployee(id).pipe(tap(() => this.store.removeEmployee(id)));
-  }
-
-  createADUser(u: Omit<ADUser, 'id'>): Observable<ADUser> {
-    return this.api.createADUser(u).pipe(tap((item) => this.store.addADUser(item)));
-  }
-  updateADUser(u: ADUser): Observable<ADUser> {
-    return this.api.updateADUser(u).pipe(tap((item) => this.store.updateADUser(item)));
-  }
-  deleteADUser(id: string): Observable<void> {
-    return this.api.deleteADUser(id).pipe(tap(() => this.store.removeADUser(id)));
   }
 
   createDepartment(d: Omit<Department, 'id'>): Observable<Department> {

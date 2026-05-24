@@ -1,0 +1,116 @@
+.detail-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.detail-nav-actions { display: flex; gap: 8px; }
+
+/* ===== Hero ===== */
+.detail-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.hero-left { display: flex; align-items: center; gap: 18px; }
+.hero-photo {
+  width: 96px; height: 96px; border-radius: 50%;
+  object-fit: cover; flex-shrink: 0;
+}
+:host ::ng-deep .hero-avatar {
+  width: 96px; height: 96px; font-size: 32px;
+  background: var(--c-primary-50); color: var(--c-primary);
+}
+.hero-name { font-size: 22px; font-weight: 700; margin: 0; }
+.hero-position { margin-top: 4px; }
+.hero-badges { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+.hero-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 220px;
+}
+
+/* ===== Info grid ===== */
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .detail-grid { grid-template-columns: 1fr; }
+}
+.info-card.full-width { grid-column: 1 / -1; }
+
+.info-list { display: flex; flex-direction: column; }
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-top: 1px solid var(--c-divider);
+
+  &:first-child { border-top: 0; }
+  span { color: var(--c-text-muted); font-size: 13px; }
+  b { text-align: right; }
+}
+.goal-text { margin: 0; line-height: 1.5; }
+
+/* ===== Пункты плана ===== */
+.plan-item {
+  padding: 14px 0;
+  border-top: 1px solid var(--c-divider);
+  &:first-child { border-top: 0; }
+}
+.plan-item-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.plan-item-title { line-height: 1.4; }
+.plan-item-badges { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.plan-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 8px;
+  color: var(--c-text-muted);
+  font-size: 13px;
+  i { margin-right: 4px; }
+}
+.plan-item-results {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 10px;
+}
+@media (max-width: 700px) {
+  .plan-item-results { grid-template-columns: 1fr; }
+}
+
+:host ::ng-deep .plan-bar { width: 100%; min-width: 200px; }
+
+/* ===== Skeleton ===== */
+.detail-skeleton { display: flex; flex-direction: column; gap: 16px; }
+.sk-hero {
+  display: flex; align-items: center; gap: 18px;
+  padding: 24px; background: var(--c-surface);
+  border: 1px solid var(--c-border); border-radius: var(--r-lg);
+}
+.sk-hero-text { display: flex; flex-direction: column; }
+.sk-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (max-width: 900px) { .sk-cards { grid-template-columns: 1fr; } }
+.sk-card { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.sk-row { display: flex; justify-content: space-between; gap: 16px; }
+:host ::ng-deep .mt-8 { margin-top: 8px; }

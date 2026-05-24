@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { makeId } from '../../../shared/utils/text';
 import {
-  Human,
   HumanDetail,
   HumansSearchRequest,
   HumansSearchResponse,
@@ -13,7 +12,6 @@ import {
 import { EmploymentStatus } from '../enums/employment-status.enum';
 import { ContactType } from '../enums/contact-type.enum';
 import { Employee } from '../models/interfaces/employee.interface';
-import { ADUser } from '../models/interfaces/ad-user.interface';
 import { Department } from '../models/interfaces/department.interface';
 import { Contact } from '../models/interfaces/contact.interface';
 
@@ -26,15 +24,6 @@ const SEED_EMPLOYEES: Employee[] = [
   { id: makeId(), fullName: 'Павел Морозов', position: 'Бухгалтер', department: 'Финансы', email: 'p.morozov@blanc.bank', phone: '+7 (495) 110-22-06', hireDate: '2018-04-22', status: EmploymentStatus.Active, manager: 'Елена Кузьмина', city: 'Казань' },
   { id: makeId(), fullName: 'Светлана Зайцева', position: 'Рекрутер', department: 'HR', email: 's.zaytseva@blanc.bank', phone: '+7 (495) 110-22-07', hireDate: '2024-01-15', status: EmploymentStatus.Probation, manager: 'Илья Громов', city: 'Москва' },
   { id: makeId(), fullName: 'Никита Семенов', position: 'DevOps инженер', department: 'IT', email: 'n.semenov@blanc.bank', phone: '+7 (495) 110-22-08', hireDate: '2022-07-12', status: EmploymentStatus.Active, manager: 'Сергей Беляев', city: 'Москва' },
-];
-
-const SEED_AD_USERS: ADUser[] = [
-  { id: makeId(), login: 'a.sokolova', displayName: 'Анна Соколова', email: 'a.sokolova@blanc.bank', ou: 'OU=HR,DC=blanc,DC=bank', lastLogin: '2026-05-21T08:32:00', enabled: true, groups: ['HR-Staff', 'Portal-Users'] },
-  { id: makeId(), login: 'd.orlov', displayName: 'Дмитрий Орлов', email: 'd.orlov@blanc.bank', ou: 'OU=IT,DC=blanc,DC=bank', lastLogin: '2026-05-21T09:05:00', enabled: true, groups: ['IT-Dev', 'VPN-Users', 'Portal-Admins'] },
-  { id: makeId(), login: 'm.lebedeva', displayName: 'Мария Лебедева', email: 'm.lebedeva@blanc.bank', ou: 'OU=Marketing,DC=blanc,DC=bank', lastLogin: '2026-05-20T14:20:00', enabled: true, groups: ['Marketing', 'Portal-Users'] },
-  { id: makeId(), login: 'i.zakharov', displayName: 'Игорь Захаров', email: 'i.zakharov@blanc.bank', ou: 'OU=Finance,DC=blanc,DC=bank', lastLogin: '2026-05-19T18:42:00', enabled: true, groups: ['Finance', 'Portal-Users'] },
-  { id: makeId(), login: 't.voronova', displayName: 'Татьяна Воронова', email: 't.voronova@blanc.bank', ou: 'OU=Product,DC=blanc,DC=bank', lastLogin: '2026-04-22T11:10:00', enabled: false, groups: ['Product', 'Portal-Users'] },
-  { id: makeId(), login: 'n.semenov', displayName: 'Никита Семенов', email: 'n.semenov@blanc.bank', ou: 'OU=IT,DC=blanc,DC=bank', lastLogin: '2026-05-21T07:55:00', enabled: true, groups: ['IT-Ops', 'VPN-Users', 'Portal-Admins'] },
 ];
 
 const SEED_DEPARTMENTS: Department[] = [
@@ -84,11 +73,6 @@ export class EmployeesApi {
   createEmployee(e: Omit<Employee, 'id'>): Observable<Employee> { return of({ ...e, id: makeId() }); }
   updateEmployee(e: Employee): Observable<Employee> { return of(e); }
   deleteEmployee(_id: string): Observable<void> { return of(undefined); }
-
-  listADUsers(): Observable<ADUser[]> { return of(SEED_AD_USERS); }
-  createADUser(u: Omit<ADUser, 'id'>): Observable<ADUser> { return of({ ...u, id: makeId() }); }
-  updateADUser(u: ADUser): Observable<ADUser> { return of(u); }
-  deleteADUser(_id: string): Observable<void> { return of(undefined); }
 
   listDepartments(): Observable<Department[]> { return of(SEED_DEPARTMENTS); }
   createDepartment(d: Omit<Department, 'id'>): Observable<Department> { return of({ ...d, id: makeId() }); }

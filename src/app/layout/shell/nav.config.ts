@@ -31,7 +31,6 @@ export const NAV: NavGroup[] = [
         icon: 'users',
         children: [
           { label: 'Трудоустроенные', link: '/employees/employed' },
-          { label: 'Пользователи AD', link: '/employees/ad-users' },
           { label: 'Отделы', link: '/employees/departments' },
           { label: 'Контакты', link: '/employees/contacts' },
         ],
@@ -50,6 +49,7 @@ export const NAV: NavGroup[] = [
         ],
       },
       { label: 'Опросники', icon: 'clipboard-list', link: '/surveys' },
+      { label: 'Performance Review', icon: 'graduation', link: '/performance-review' },
     ],
   },
   {

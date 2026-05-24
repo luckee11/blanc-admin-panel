@@ -37,12 +37,6 @@ export const routes: Routes = [
             .then((m) => m.HumanDetailComponent),
       },
       {
-        path: 'employees/ad-users',
-        loadComponent: () =>
-          import('./features/employees/ui/pages/ad-users/ad-users.component')
-            .then((m) => m.ADUsersComponent),
-      },
-      {
         path: 'employees/departments',
         loadComponent: () =>
           import('./features/employees/ui/pages/departments/departments.component')
@@ -64,6 +58,12 @@ export const routes: Routes = [
             .then((m) => m.PlansComponent),
       },
       {
+        path: 'ipr/plans/:id',
+        loadComponent: () =>
+          import('./features/ipr/ui/pages/plan-detail/plan-detail.component')
+            .then((m) => m.PlanDetailComponent),
+      },
+      {
         path: 'ipr/tasks',
         loadComponent: () =>
           import('./features/ipr/ui/pages/tasks/tasks.component')
@@ -76,6 +76,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/surveys/ui/pages/surveys-page/surveys-page.component')
             .then((m) => m.SurveysPageComponent),
+      },
+      {
+        path: 'performance-review',
+        loadComponent: () =>
+          import('./features/performance-review/ui/pages/performance-review-page/performance-review-page.component')
+            .then((m) => m.PerformanceReviewPageComponent),
       },
       {
         path: 'roles',

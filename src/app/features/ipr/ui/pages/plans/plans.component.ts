@@ -1,48 +1,62 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnDestroy, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { TableModule } from 'primeng/table';
+import { Router } from '@angular/router';
+import { TableModule, TableLazyLoadEvent } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
 import { AvatarModule } from 'primeng/avatar';
 import { ProgressBarModule } from 'primeng/progressbar';
-import { SliderModule } from 'primeng/slider';
 import { TooltipModule } from 'primeng/tooltip';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
-import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { ConfirmDeleteComponent } from '../../../../../shared/components/confirm-delete/confirm-delete.component';
+import { ToastService } from '../../../../../shared/services/toast.service';
 import { formatDate } from '../../../../../shared/utils/format';
 import { initialsOf } from '../../../../../shared/utils/text';
 import { IprFacade } from '../../../dataProviders/ipr.facade';
-import { IprPlan } from '../../../models/interfaces/ipr-plan.interface';
+import {
+  DevelopmentPlanEmployee,
+  DevelopmentPlanListItem,
+  DevelopmentPlanSupervisor,
+} from '../../../models/interfaces/ipr-plan.interface';
 import { IprStatus } from '../../../enums/ipr-status.enum';
-import { getIprStatusLabel } from '../../../utils/functions/ipr.functions';
+import { calcProgress, getIprStatusLabel } from '../../../utils/functions/ipr.functions';
+
+const DEFAULT_PAGE_SIZE = 10;
 
 @Component({
   selector: 'app-ipr-plans',
   standalone: true,
   imports: [
     FormsModule,
-    TableModule, ButtonModule, InputTextModule, TextareaModule, SelectModule,
-    TagModule, AvatarModule, ProgressBarModule, SliderModule, TooltipModule,
+    TableModule, ButtonModule, InputTextModule, SelectModule,
+    TagModule, AvatarModule, ProgressBarModule, TooltipModule,
     IconFieldModule, InputIconModule,
-    ModalComponent, PageHeaderComponent, ConfirmDeleteComponent,
+    PageHeaderComponent, ConfirmDeleteComponent,
   ],
   templateUrl: './plans.component.html',
   styleUrl: './plans.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PlansComponent {
+export class PlansComponent implements OnDestroy {
   private facade     = inject(IprFacade);
+  private router     = inject(Router);
+  private toast      = inject(ToastService);
   private destroyRef = inject(DestroyRef);
 
-  plans = this.facade.plans;
-  globalFilter = '';
+  plans      = this.facade.developmentPlans;
+  pagination = this.facade.plansPagination;
+  loading    = this.facade.plansLoading;
+
+  searchKeyword   = '';
+  selectedStatus: IprStatus | '' = '';
+  currentPageSize = DEFAULT_PAGE_SIZE;
+
+  private searchTimer: ReturnType<typeof setTimeout> | null = null;
 
   statusFilterOptions = [
     { label: 'Все статусы', value: '' },
@@ -52,56 +66,96 @@ export class PlansComponent {
     { label: 'Завершён', value: IprStatus.Completed },
     { label: 'Просрочен', value: IprStatus.Overdue },
   ];
-  selectedStatus = '';
-
-  statusFormOptions = [
-    { label: 'Черновик', value: IprStatus.Draft },
-    { label: 'В работе', value: IprStatus.InProgress },
-    { label: 'На ревью', value: IprStatus.OnReview },
-    { label: 'Завершён', value: IprStatus.Completed },
-    { label: 'Просрочен', value: IprStatus.Overdue },
-  ];
-
-  count(s: IprStatus) { return this.plans().filter((p) => p.status === s).length; }
 
   readonly IprStatus = IprStatus;
 
-  modal = signal<'form' | 'view' | 'delete' | null>(null);
-  editing = signal<IprPlan | null>(null);
-  form: IprPlan = this.empty();
-
-  empty(): IprPlan {
-    return {
-      id: '', employeeName: '', position: '', period: '2026 H1', goal: '',
-      status: IprStatus.Draft, progress: 0, tasksTotal: 0, tasksDone: 0, mentor: '',
-      startDate: new Date().toISOString().slice(0, 10),
-      endDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-    };
+  /* ===== Серверные поиск / фильтр / пагинация (POST /api/admin/development-plans/search) ===== */
+  onLazyLoad(event: TableLazyLoadEvent): void {
+    const rows = event.rows ?? DEFAULT_PAGE_SIZE;
+    const page = Math.floor((event.first ?? 0) / rows);
+    this.currentPageSize = rows;
+    this.runSearch(page, rows);
   }
 
-  canSave() { return !!(this.form.employeeName && this.form.goal && this.form.period); }
-
-  openCreate() { this.form = this.empty(); this.editing.set(null); this.modal.set('form'); }
-  openEdit(p: IprPlan) { this.form = { ...p }; this.editing.set(p); this.modal.set('form'); }
-  openView(p: IprPlan) { this.editing.set(p); this.modal.set('view'); }
-  openDelete(p: IprPlan) { this.editing.set(p); this.modal.set('delete'); }
-  closeModal() { this.modal.set(null); this.editing.set(null); }
-
-  save() {
-    if (!this.canSave()) return;
-    this.form.progress = Number(this.form.progress) || 0;
-    const op$ = this.editing()?.id
-      ? this.facade.updatePlan(this.form)
-      : this.facade.createPlan(this.form);
-    op$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.closeModal());
+  onSearchInput(): void {
+    if (this.searchTimer) clearTimeout(this.searchTimer);
+    this.searchTimer = setTimeout(() => this.runSearch(0, this.currentPageSize), 400);
   }
 
-  doDelete() {
-    const p = this.editing();
-    if (!p) { this.closeModal(); return; }
-    this.facade.deletePlan(p.id)
+  onStatusChange(): void {
+    this.runSearch(0, this.currentPageSize);
+  }
+
+  refresh(): void {
+    this.runSearch(0, this.currentPageSize);
+  }
+
+  ngOnDestroy(): void {
+    if (this.searchTimer) clearTimeout(this.searchTimer);
+  }
+
+  private runSearch(page: number, pageSize: number): void {
+    this.facade.searchDevelopmentPlans({
+      keyword: this.searchKeyword.trim() || undefined,
+      page,
+      pageSize,
+      status: this.selectedStatus ? [this.selectedStatus] : undefined,
+    })
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.closeModal());
+      .subscribe();
+  }
+
+  /** Счётчик по статусу в пределах загруженной страницы. */
+  count(s: IprStatus): number {
+    return this.plans().filter((p) => p.status === s).length;
+  }
+
+  /* ===== Детальный просмотр (отдельная страница) ===== */
+  openDetail(p: DevelopmentPlanListItem): void {
+    this.router.navigate(['/ipr/plans', p.id]);
+  }
+
+  /* ===== Удаление ===== */
+  toDelete = signal<DevelopmentPlanListItem | null>(null);
+  deleting = signal(false);
+
+  openDelete(p: DevelopmentPlanListItem): void { this.toDelete.set(p); }
+  cancelDelete(): void { this.toDelete.set(null); }
+
+  confirmDelete(): void {
+    const plan = this.toDelete();
+    if (!plan) return;
+    this.deleting.set(true);
+    this.facade.deleteDevelopmentPlan(plan.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.deleting.set(false);
+          this.toDelete.set(null);
+          this.toast.success('План удалён', `${this.fullName(plan.employee)} · ${plan.year}`);
+          // Обновляем страницу, чтобы пересчитать пагинацию/тоталы.
+          this.refresh();
+        },
+        error: () => {
+          this.deleting.set(false);
+          this.toast.error('Не удалось удалить план', 'Попробуйте ещё раз');
+        },
+      });
+  }
+
+  /* ===== Хелперы отображения ===== */
+  fullName(p?: DevelopmentPlanEmployee | DevelopmentPlanSupervisor | null): string {
+    if (!p) return '—';
+    return [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(' ') || '—';
+  }
+
+  ini(p?: DevelopmentPlanEmployee | DevelopmentPlanSupervisor | null): string {
+    if (!p) return '';
+    return initialsOf(`${p.firstName ?? ''} ${p.lastName ?? ''}`);
+  }
+
+  progress(p: DevelopmentPlanListItem): number {
+    return calcProgress(p.completedItemsCount, p.itemsCount);
   }
 
   tagSeverity(s: IprStatus): 'secondary' | 'info' | 'warn' | 'success' | 'danger' {
@@ -112,7 +166,6 @@ export class PlansComponent {
     return map[s] ?? 'secondary';
   }
 
-  ini(n: string) { return initialsOf(n); }
-  label(s: IprStatus) { return getIprStatusLabel(s); }
-  fmt(d?: string) { return formatDate(d); }
+  label(s: IprStatus): string { return getIprStatusLabel(s); }
+  fmt(d?: string | null): string { return formatDate(d ?? undefined); }
 }

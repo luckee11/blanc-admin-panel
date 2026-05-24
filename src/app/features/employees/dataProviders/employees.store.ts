@@ -1,6 +1,5 @@
 import { Injectable, signal } from '@angular/core';
 import { Employee } from '../models/interfaces/employee.interface';
-import { ADUser } from '../models/interfaces/ad-user.interface';
 import { Department } from '../models/interfaces/department.interface';
 import { Contact } from '../models/interfaces/contact.interface';
 import { Human, HumanDetail, HumansSearchResponse, RecentHuman } from '../models/interfaces/human.interface';
@@ -60,15 +59,6 @@ export class EmployeesStore {
   addEmployee(e: Employee) { this._employees.update((l) => [e, ...l]); }
   updateEmployee(e: Employee) { this._employees.update((l) => l.map((x) => x.id === e.id ? e : x)); }
   removeEmployee(id: string) { this._employees.update((l) => l.filter((x) => x.id !== id)); }
-
-  /* ===== AD Users ===== */
-  private _adUsers = signal<ADUser[]>([]);
-  readonly adUsers = this._adUsers.asReadonly();
-
-  setADUsers(items: ADUser[]) { this._adUsers.set(items); }
-  addADUser(u: ADUser) { this._adUsers.update((l) => [u, ...l]); }
-  updateADUser(u: ADUser) { this._adUsers.update((l) => l.map((x) => x.id === u.id ? u : x)); }
-  removeADUser(id: string) { this._adUsers.update((l) => l.filter((x) => x.id !== id)); }
 
   /* ===== Departments ===== */
   private _departments = signal<Department[]>([]);

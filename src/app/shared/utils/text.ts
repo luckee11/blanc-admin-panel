@@ -1,4 +1,5 @@
-export function initialsOf(fullName: string): string {
+export function initialsOf(fullName?: string | null): string {
+  if (!fullName) return '';
   return fullName
     .split(/\s+/)
     .filter(Boolean)

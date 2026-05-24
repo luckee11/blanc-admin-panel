@@ -1,10 +1,16 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { makeId } from '../../../shared/utils/text';
 import { IprStatus } from '../enums/ipr-status.enum';
 import { TaskPriority } from '../enums/task-priority.enum';
 import { TaskCategory } from '../enums/task-category.enum';
-import { IprPlan } from '../models/interfaces/ipr-plan.interface';
+import {
+  DevelopmentPlanDetail,
+  DevelopmentPlansSearchResponse,
+  IprPlan,
+  SearchDevelopmentPlansRequest,
+} from '../models/interfaces/ipr-plan.interface';
 import { IprTask } from '../models/interfaces/ipr-task.interface';
 
 const SEED_PLANS: IprPlan[] = [
@@ -26,6 +32,28 @@ const SEED_TASKS: IprTask[] = [
 
 @Injectable({ providedIn: 'root' })
 export class IprApi {
+  private http = inject(HttpClient);
+
+  /** POST /api/admin/development-plans/search — поиск планов развития с пагинацией. */
+  searchDevelopmentPlans(
+    req: SearchDevelopmentPlansRequest,
+  ): Observable<DevelopmentPlansSearchResponse> {
+    return this.http.post<DevelopmentPlansSearchResponse>(
+      '/api/admin/development-plans/search',
+      req,
+    );
+  }
+
+  /** GET /api/admin/development-plans/{id} — детальный план развития (с пунктами). */
+  getDevelopmentPlanById(id: string): Observable<DevelopmentPlanDetail> {
+    return this.http.get<DevelopmentPlanDetail>(`/api/admin/development-plans/${id}`);
+  }
+
+  /** DELETE /api/admin/development-plans/{id} — удаление плана развития. */
+  deleteDevelopmentPlan(id: string): Observable<void> {
+    return this.http.delete<void>(`/api/admin/development-plans/${id}`);
+  }
+
   listPlans(): Observable<IprPlan[]> { return of(SEED_PLANS); }
   createPlan(p: Omit<IprPlan, 'id'>): Observable<IprPlan> { return of({ ...p, id: makeId() }); }
   updatePlan(p: IprPlan): Observable<IprPlan> { return of(p); }

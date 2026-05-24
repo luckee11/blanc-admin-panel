@@ -1,0 +1,51 @@
+<ui-page-header
+  title="Performance Review"
+  subtitle="Циклы оценки эффективности сотрудников">
+  <p-button label="Обновить" icon="pi pi-refresh" severity="secondary" (onClick)="refresh()" />
+</ui-page-header>
+
+<div class="card prim-table-card">
+  <p-table
+    [value]="reviews()"
+    [loading]="loading()"
+    dataKey="id">
+
+    <ng-template pTemplate="caption">
+      <div class="table-toolbar">
+        <span class="muted text-sm table-count">
+          Всего: <strong style="color:var(--c-text)">{{ reviews().length }}</strong>
+        </span>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="startDate" style="min-width:160px">Начало <p-sortIcon field="startDate" /></th>
+        <th pSortableColumn="endDate" style="min-width:160px">Окончание <p-sortIcon field="endDate" /></th>
+        <th style="min-width:140px">Статус</th>
+        <th style="min-width:130px">Участников</th>
+        <th style="min-width:130px">Опросников</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-r>
+      <tr>
+        <td>{{ fmtDate(r.startDate) }}</td>
+        <td>{{ fmtDate(r.endDate) }}</td>
+        <td><p-tag [value]="statusLabel(r.status)" [severity]="statusSeverity(r.status)" [rounded]="true" /></td>
+        <td>{{ count(r.humanPerformanceReviews) }}</td>
+        <td>{{ count(r.prQuestionnaires) }}</td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr><td colspan="5">
+        <div class="empty-state">
+          <div class="icon-wrap"><i class="pi pi-chart-line" style="font-size:22px"></i></div>
+          <h3>Нет performance review</h3>
+          <p>Список пуст или данные ещё не загружены.</p>
+        </div>
+      </td></tr>
+    </ng-template>
+  </p-table>
+</div>
