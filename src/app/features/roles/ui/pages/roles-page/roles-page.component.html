@@ -1,0 +1,127 @@
+<ui-page-header title="Роли и права доступа" subtitle="Настройка ролевой модели и permissions">
+  <p-button label="Управлять permissions" icon="pi pi-shield" severity="secondary" (onClick)="openPermissions()" />
+  <p-button label="Создать роль" icon="pi pi-plus" (onClick)="openCreate()" />
+</ui-page-header>
+
+<div class="role-layout">
+  <!-- Список ролей -->
+  <div class="role-list card">
+    <div class="card-header"><h3>Роли ({{ roles().length }})</h3></div>
+    <div class="role-items">
+      @for (r of roles(); track r.id) {
+        <button type="button" class="role-item" [class.active]="selected()?.id === r.id" (click)="select(r)">
+          <div class="role-icon"><i class="pi pi-shield" style="font-size:16px"></i></div>
+          <div class="role-item-body">
+            <div class="fw-600 truncate">{{ r.name }}</div>
+            <div class="muted text-sm truncate">{{ r.users }} польз. · {{ r.permissions.length }} прав</div>
+          </div>
+          @if (r.system) { <span class="badge badge-neutral">SYS</span> }
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Детали роли -->
+  <div class="role-detail card">
+    @if (selected(); as r) {
+      <div class="card-header">
+        <div>
+          <h2>{{ r.name }}</h2>
+          <p class="muted text-sm role-desc">{{ r.description }}</p>
+        </div>
+        <div style="display:flex;gap:8px">
+          <p-button label="Изменить" icon="pi pi-pencil" severity="secondary" size="small" (onClick)="openEdit(r)" />
+          @if (!r.system) {
+            <p-button icon="pi pi-trash" rounded text severity="danger" size="small" pTooltip="Удалить роль" (onClick)="openDelete(r)" />
+          }
+        </div>
+      </div>
+
+      <div class="role-summary">
+        <div class="rs-item">
+          <div class="rs-icon icon-blue"><i class="pi pi-users" style="font-size:16px"></i></div>
+          <div><div class="muted text-sm">Пользователей</div><div class="fw-600 text-lg">{{ r.users }}</div></div>
+        </div>
+        <div class="rs-item">
+          <div class="rs-icon icon-emerald"><i class="pi pi-check-square" style="font-size:16px"></i></div>
+          <div><div class="muted text-sm">Прав назначено</div><div class="fw-600 text-lg">{{ r.permissions.length }} / {{ totalPerms() }}</div></div>
+        </div>
+        <div class="rs-item">
+          <div class="rs-icon icon-gold"><i class="pi pi-shield" style="font-size:16px"></i></div>
+          <div><div class="muted text-sm">Тип</div><div class="fw-600 text-lg">{{ r.system ? 'Системная' : 'Польз.' }}</div></div>
+        </div>
+      </div>
+
+      <div class="perms-section">
+        <div class="perms-head"><h3>Permissions</h3><span class="muted text-sm">Отметьте права для роли</span></div>
+        @for (group of permGroups(); track group.group) {
+          <div class="perm-group">
+            <div class="perm-group-head">
+              <div class="perm-group-title">{{ group.group }}</div>
+              <span class="muted text-sm">{{ groupSelected(r, group.items) }} / {{ group.items.length }}</span>
+            </div>
+            <div class="perm-items">
+              @for (p of group.items; track p.id) {
+                <label class="perm-row" [class.checked]="hasPerm(r, p.id)">
+                  <p-checkbox [binary]="true"
+                              [ngModel]="hasPerm(r, p.id)"
+                              (ngModelChange)="togglePerm(r, p.id, $event)"
+                              [disabled]="r.system"
+                              [inputId]="'perm-' + p.id" />
+                  <div class="perm-text">
+                    <div class="fw-500">{{ p.name }}</div>
+                    <div class="muted text-sm">{{ p.code }}</div>
+                  </div>
+                </label>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <div class="icon-wrap"><i class="pi pi-shield" style="font-size:22px"></i></div>
+        <h3>Выберите роль</h3>
+        <p>Кликните на роль слева, чтобы увидеть и настроить её права.</p>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Form modal -->
+<ui-modal [visible]="modal() === 'form'"
+          [title]="editing()?.id ? 'Редактирование роли' : 'Новая роль'"
+          size="md" (close)="closeModal()">
+  <div class="form-grid">
+    <div class="field full"><label class="field-label">Название роли *</label><input pInputText [(ngModel)]="form.name" /></div>
+    <div class="field full"><label class="field-label">Описание</label><textarea pTextarea [(ngModel)]="form.description" [rows]="3" [autoResize]="true"></textarea></div>
+  </div>
+  <p class="muted text-sm form-note">После создания вы сможете настроить permissions роли.</p>
+  <ng-container footer>
+    <p-button label="Отмена" severity="secondary" text (onClick)="closeModal()" />
+    <p-button [label]="editing()?.id ? 'Сохранить' : 'Создать'" (onClick)="save()" [disabled]="!canSave()" />
+  </ng-container>
+</ui-modal>
+
+<!-- Permissions catalogue -->
+<ui-modal [visible]="modal() === 'permissions'" title="Каталог permissions" size="lg" (close)="closeModal()">
+  <p class="muted text-sm cat-intro">Системный каталог разрешений. Присваиваются ролям, роли — пользователям.</p>
+  @for (group of permGroups(); track group.group) {
+    <div class="cat-group">
+      <div class="cat-group-title">{{ group.group }}</div>
+      @for (p of group.items; track p.id) {
+        <div class="cat-row">
+          <div><div class="fw-500">{{ p.name }}</div><div class="muted text-sm">{{ p.code }}</div></div>
+          <span class="badge badge-info">{{ usedIn(p.id) }} ролей</span>
+        </div>
+      }
+    </div>
+  }
+  <ng-container footer>
+    <p-button label="Закрыть" (onClick)="closeModal()" />
+  </ng-container>
+</ui-modal>
+
+<ui-confirm-delete [visible]="modal() === 'delete'"
+                   [entity]="'роль ' + (editing()?.name ?? '')"
+                   (confirm)="doDelete()" (cancel)="closeModal()" />

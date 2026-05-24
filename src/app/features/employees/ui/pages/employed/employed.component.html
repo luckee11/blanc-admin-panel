@@ -1,0 +1,88 @@
+<ui-page-header title="Сотрудники" subtitle="Трудоустроенные сотрудники Blanc Bank">
+  <p-button label="Обновить" icon="pi pi-refresh" severity="secondary"
+            (onClick)="refresh()" />
+</ui-page-header>
+
+<div class="card prim-table-card">
+  <p-table
+    #dt
+    [value]="humans()"
+    [lazy]="true"
+    [loading]="loading()"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [totalRecords]="pagination()?.totalCount ?? 0"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Показано {first}–{last} из {totalRecords}"
+    (onLazyLoad)="onLazyLoad($event)"
+    dataKey="id">
+
+    <ng-template pTemplate="caption">
+      <div class="table-toolbar">
+        <p-iconfield>
+          <p-inputicon styleClass="pi pi-search" />
+          <input pInputText type="text" placeholder="Поиск по ФИО, должности, группе..."
+                 [(ngModel)]="searchKeyword" (input)="onSearchInput()" />
+        </p-iconfield>
+        <span class="muted text-sm table-count">
+          Всего: <strong style="color:var(--c-text)">{{ pagination()?.totalCount ?? 0 }}</strong>
+        </span>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="min-width:240px">Сотрудник</th>
+        <th style="min-width:200px">Должность</th>
+        <th style="min-width:200px">Группа / Отдел</th>
+        <th style="min-width:130px">Статус</th>
+        <th style="width:48px"></th>
+      </tr>
+    </ng-template>
+
+    <!-- Кликабельные строки — переход на детальную страницу -->
+    <ng-template pTemplate="body" let-h>
+      <tr class="row-link" (click)="openDetail(h)">
+        <td>
+          <div class="cell-emp">
+            <p-avatar [label]="ini(h.fullName)" shape="circle" />
+            <div class="fw-600">{{ h.fullName }}</div>
+          </div>
+        </td>
+        <td>{{ h.position }}</td>
+        <td class="muted">{{ h.squadName }}</td>
+        <td>
+          <p-tag [value]="h.status" [severity]="tagSeverity(h.status)" [rounded]="true" />
+        </td>
+        <td class="td-arrow">
+          <i class="pi pi-chevron-right"></i>
+        </td>
+      </tr>
+    </ng-template>
+
+    <!-- Loading skeleton -->
+    <ng-template pTemplate="loadingbody">
+      @for (i of [1,2,3,4,5,6,7,8,9,10]; track i) {
+        <tr>
+          <td colspan="5">
+            <div class="skeleton-row">
+              <div class="skeleton sk-avatar"></div>
+              <div class="skeleton sk-text"></div>
+            </div>
+          </td>
+        </tr>
+      }
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr><td colspan="5">
+        <div class="empty-state">
+          <div class="icon-wrap"><i class="pi pi-users" style="font-size:22px"></i></div>
+          <h3>Сотрудники не найдены</h3>
+          <p>Попробуйте изменить поисковый запрос.</p>
+        </div>
+      </td></tr>
+    </ng-template>
+  </p-table>
+</div>

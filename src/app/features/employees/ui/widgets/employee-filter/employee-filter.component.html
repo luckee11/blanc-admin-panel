@@ -1,0 +1,21 @@
+<div class="toolbar">
+  <div class="search-input-wrap">
+    <ui-icon name="search" [size]="16" />
+    <input class="input" placeholder="Поиск по имени, должности, email..."
+           [(ngModel)]="search" (ngModelChange)="onSearch()" />
+  </div>
+  <select class="select toolbar-select" [(ngModel)]="dept" (ngModelChange)="onDept()">
+    <option value="">Все отделы</option>
+    @for (d of departments(); track d) { <option [value]="d">{{ d }}</option> }
+  </select>
+  <select class="select toolbar-select-sm" [(ngModel)]="status" (ngModelChange)="onStatus()">
+    <option value="">Все статусы</option>
+    <option [value]="EmploymentStatus.Active">Работает</option>
+    <option [value]="EmploymentStatus.Probation">Испытательный</option>
+    <option [value]="EmploymentStatus.Leave">В отпуске</option>
+    <option [value]="EmploymentStatus.Terminated">Уволен</option>
+  </select>
+  <div class="toolbar-count">
+    Найдено: <strong>{{ resultCount() }}</strong>
+  </div>
+</div>

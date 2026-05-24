@@ -1,0 +1,65 @@
+<ui-page-header title="Опросники" subtitle="Опросы вовлечённости, обратной связи и оценки">
+  <p-button label="Создать опрос" icon="pi pi-plus" (onClick)="openCreate()" />
+</ui-page-header>
+
+<div class="survey-grid">
+  @for (s of surveys(); track s.id) {
+    <app-survey-card [survey]="s"
+      (view)="openView(s)" (edit)="openEdit(s)" (delete)="openDelete(s)" />
+  } @empty {
+    <div class="empty-full">
+      <div class="empty-state">
+        <div class="icon-wrap"><i class="pi pi-list" style="font-size:22px"></i></div>
+        <h3>Опросы не созданы</h3>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Form modal -->
+<ui-modal [visible]="modal() === 'form'"
+          [title]="editing()?.id ? 'Редактирование опроса' : 'Новый опрос'"
+          size="lg" (close)="closeModal()">
+  <div class="form-grid">
+    <div class="field full"><label class="field-label">Название *</label><input pInputText [(ngModel)]="form.title" /></div>
+    <div class="field full"><label class="field-label">Описание</label><textarea pTextarea [(ngModel)]="form.description" [rows]="3" [autoResize]="true"></textarea></div>
+    <div class="field"><label class="field-label">Аудитория</label><input pInputText [(ngModel)]="form.audience" placeholder="Все сотрудники, отдел..." /></div>
+    <div class="field">
+      <label class="field-label">Статус</label>
+      <p-select [options]="statusFormOpts" [(ngModel)]="form.status" optionLabel="label" optionValue="value" [fluid]="true" />
+    </div>
+    <div class="field"><label class="field-label">Количество вопросов</label><input pInputText type="number" min="0" [(ngModel)]="form.questions" /></div>
+    <div class="field"><label class="field-label">Размер аудитории</label><input pInputText type="number" min="0" [(ngModel)]="form.totalRecipients" /></div>
+    <div class="field"><label class="field-label">Начало</label><input pInputText type="date" [(ngModel)]="form.startDate" /></div>
+    <div class="field"><label class="field-label">Окончание</label><input pInputText type="date" [(ngModel)]="form.endDate" /></div>
+  </div>
+  <ng-container footer>
+    <p-button label="Отмена" severity="secondary" text (onClick)="closeModal()" />
+    <p-button [label]="editing()?.id ? 'Сохранить' : 'Создать'" (onClick)="save()" [disabled]="!canSave()" />
+  </ng-container>
+</ui-modal>
+
+<!-- View modal -->
+<ui-modal [visible]="modal() === 'view' && editing() !== null"
+          [title]="editing()?.title ?? ''" size="md" (close)="closeModal()">
+  @if (editing(); as e) {
+    <p-tag [value]="label(e.status)" [severity]="tagSeverity(e.status)" [rounded]="true" />
+    <p class="view-desc">{{ e.description }}</p>
+    <div class="kv">
+      <div><span>Аудитория</span><b>{{ e.audience }}</b></div>
+      <div><span>Вопросов</span><b>{{ e.questions }}</b></div>
+      <div><span>Получателей</span><b>{{ e.totalRecipients }}</b></div>
+      <div><span>Ответов</span><b>{{ e.responses }} ({{ pct(e) }}%)</b></div>
+      <div><span>Начало</span><b>{{ fmt(e.startDate) }}</b></div>
+      <div><span>Окончание</span><b>{{ fmt(e.endDate) }}</b></div>
+    </div>
+    <ng-container footer>
+      <p-button label="Закрыть" severity="secondary" text (onClick)="closeModal()" />
+      <p-button label="Редактировать" icon="pi pi-pencil" (onClick)="openEdit(e)" />
+    </ng-container>
+  }
+</ui-modal>
+
+<ui-confirm-delete [visible]="modal() === 'delete'"
+                   [entity]="editing()?.title ?? ''"
+                   (confirm)="doDelete()" (cancel)="closeModal()" />

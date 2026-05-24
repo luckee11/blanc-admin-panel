@@ -1,0 +1,8 @@
+.emp-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.emp-info { flex: 1; min-width: 0; }
+.emp-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

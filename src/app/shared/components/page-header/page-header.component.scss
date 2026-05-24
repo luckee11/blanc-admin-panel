@@ -1,0 +1,26 @@
+.ph {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.ph-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--c-text);
+}
+
+.ph-subtitle {
+  font-size: 14px;
+  color: var(--c-text-muted);
+  margin-top: 4px;
+}
+
+.ph-actions {
+  display: inline-flex;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}

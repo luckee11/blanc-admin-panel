@@ -1,0 +1,27 @@
+<p-dialog
+  [visible]="visible()"
+  [modal]="true"
+  [style]="dialogStyle()"
+  [draggable]="false"
+  [resizable]="false"
+  [showHeader]="false"
+  [contentStyle]="{padding: 0}"
+  [closable]="false"
+  (onHide)="close.emit()">
+
+  <div class="modal-header">
+    <div class="modal-title">{{ title() }}</div>
+    <p-button icon="pi pi-times" rounded text severity="secondary"
+              size="small" (onClick)="close.emit()" aria-label="Закрыть" />
+  </div>
+
+  <div class="modal-body">
+    <ng-content />
+  </div>
+
+  @if (showFooter()) {
+    <div class="modal-footer">
+      <ng-content select="[footer]" />
+    </div>
+  }
+</p-dialog>

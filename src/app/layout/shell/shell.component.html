@@ -1,0 +1,105 @@
+<p-toast position="bottom-right" />
+<div class="layout" [class.collapsed]="collapsed()">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">
+        <img src="assets/blanc-logo.svg" alt="Blanc" />
+      </div>
+      <div class="brand-text">
+        <div class="brand-sub">Admin Panel</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      @for (group of nav; track group.group) {
+        <div class="nav-group">
+          <div class="nav-group-title">{{ group.group }}</div>
+          @for (item of group.items; track item.label) {
+            @if (item.link) {
+              <a class="nav-item"
+                 [routerLink]="item.link"
+                 routerLinkActive="active"
+                 [routerLinkActiveOptions]="{ exact: !!item.exact }">
+                <ui-icon [name]="item.icon" />
+                <span>{{ item.label }}</span>
+              </a>
+            } @else {
+              <div class="nav-parent">
+                <div class="nav-item nav-item-parent">
+                  <ui-icon [name]="item.icon" />
+                  <span>{{ item.label }}</span>
+                  <ui-icon name="chevron-down" [size]="14" />
+                </div>
+                <div class="nav-children">
+                  @for (child of item.children; track child.link) {
+                    <a class="nav-child" [routerLink]="child.link" routerLinkActive="active">
+                      <span class="dot"></span>{{ child.label }}
+                    </a>
+                  }
+                </div>
+              </div>
+            }
+          }
+        </div>
+      }
+    </nav>
+
+    <div class="side-foot">
+      <div class="side-card">
+        <ui-icon name="sparkles" [size]="16" />
+        <div>
+          <div class="side-card-title">Self-портал v3</div>
+          <div class="side-card-sub">Релиз 30 июня</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <p-button icon="pi pi-bars" rounded text severity="secondary"
+                styleClass="menu-btn" (onClick)="toggleSidebar()" />
+
+      <div class="search">
+        <ui-icon name="search" [size]="16" />
+        <input class="search-input" placeholder="Поиск сотрудников, ИПР, новостей..." />
+        <span class="kbd">⌘K</span>
+      </div>
+
+      <div class="top-actions">
+        <p-button icon="pi pi-bell" rounded text severity="secondary"
+                  [badge]="'1'" badgeSeverity="danger" aria-label="Уведомления" />
+        <p-button icon="pi pi-cog" rounded text severity="secondary" aria-label="Настройки" />
+        <div class="divider"></div>
+        <div class="user-menu" (click)="userOpen.set(!userOpen())">
+          <p-avatar [label]="user()?.initials ?? ''" shape="circle" />
+          <div class="user-info">
+            <div class="user-name">{{ user()?.name }}</div>
+            <div class="user-role">{{ user()?.role }}</div>
+          </div>
+          <ui-icon name="chevron-down" [size]="14" />
+          @if (userOpen()) {
+            <div class="user-pop" (click)="$event.stopPropagation()">
+              <div class="user-pop-header">
+                <p-avatar [label]="user()?.initials ?? ''" shape="circle" size="large" />
+                <div>
+                  <div class="user-pop-name">{{ user()?.name }}</div>
+                  <div class="user-pop-email">{{ user()?.email }}</div>
+                </div>
+              </div>
+              <p-button label="Профиль"  icon="pi pi-user"     text severity="secondary" styleClass="user-pop-item" />
+              <p-button label="Настройки" icon="pi pi-cog"     text severity="secondary" styleClass="user-pop-item" />
+              <div class="user-pop-divider"></div>
+              <p-button label="Выйти" icon="pi pi-sign-out" text severity="danger"
+                        styleClass="user-pop-item" (onClick)="logout()" />
+            </div>
+          }
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

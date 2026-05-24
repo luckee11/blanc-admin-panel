@@ -1,0 +1,9 @@
+<ui-modal title="Удалить?" size="sm" [visible]="visible()" [showFooter]="true" (close)="cancel.emit()">
+  <p class="cd-text">
+    Действие необратимо. Удалить <strong>{{ entity() }}</strong>?
+  </p>
+  <ng-container footer>
+    <p-button label="Отмена" severity="secondary" text (onClick)="cancel.emit()" />
+    <p-button label="Удалить" severity="danger" (onClick)="confirm.emit()" />
+  </ng-container>
+</ui-modal>

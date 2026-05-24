@@ -1,0 +1,27 @@
+.stats-row {
+  display: flex; gap: 24px; padding: 16px 20px;
+  background: var(--c-surface); border: 1px solid var(--c-border);
+  border-radius: var(--r-lg); margin-bottom: 16px;
+  box-shadow: var(--shadow-sm); flex-wrap: wrap;
+}
+.stat {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--c-text-muted); font-size: 13px;
+  b { color: var(--c-text); font-weight: 600; font-size: 16px; }
+  .dot { width: 8px; height: 8px; border-radius: 999px; }
+  .stat-info    { background: var(--c-info); }
+  .stat-warning { background: var(--c-warning); }
+  .stat-success { background: var(--c-success); }
+  .stat-neutral { background: #94a3b8; }
+}
+
+.goal-cell { max-width: 240px; }
+.progress-label { margin-top: 4px; }
+.goal-block { margin-bottom: 20px; }
+.goal-text { margin-top: 4px; }
+
+/* p-progressBar в таблице */
+:host ::ng-deep .plan-bar { width: 120px; }
+
+/* p-slider в форме */
+.mt-2 { margin-top: 8px; }

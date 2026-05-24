@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx ng *)",
+      "Bash(rm -f src/app/core/auth.service.ts src/app/core/auth.guard.ts src/app/core/data.service.ts src/app/core/models.ts)",
+      "Bash(rmdir src/app/core)",
+      "Bash(rm -f src/app/shared/icon.ts src/app/shared/modal.ts src/app/shared/page-header.ts src/app/shared/confirm-delete.ts src/app/shared/helpers.ts)",
+      "Bash(rm -f src/app/layout/shell.ts)",
+      "Bash(rm -rf src/app/pages)",
+      "Bash(npm install *)",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/primeng/package.json'\\).version\\)\")",
+      "Bash(node -e \"const t = require\\('./node_modules/@primeuix/themes/package.json'\\); console.log\\(t.version\\); console.log\\(Object.keys\\(t.exports || {}\\).slice\\(0, 15\\)\\)\")",
+      "Bash(node -e \"const p = require\\('./node_modules/@primeuix/themes/package.json'\\); console.log\\('version:', p.version\\);\")",
+      "Bash(node -e \"const {definePreset} = require\\('@primeuix/themes'\\); console.log\\(typeof definePreset\\);\")",
+      "Bash(node -e \"const n = require\\('@primeuix/themes/nora'\\); const k = Object.keys\\(n.semantic || {}\\); console.log\\(k.join\\('\\\\n'\\)\\);\")",
+      "Bash(node -e \"import\\('@primeuix/themes/nora'\\).then\\(m => { const n = m.default; console.log\\(JSON.stringify\\(Object.keys\\(n\\), null, 2\\)\\); }\\);\")",
+      "Bash(node -e \"import\\('@primeuix/themes/nora'\\).then\\(m => { const n = m.default; console.log\\(JSON.stringify\\(Object.keys\\(n.semantic || {}\\), null, 2\\)\\); }\\);\")",
+      "Bash(node -e \"const p=require\\('./node_modules/@angular/animations/package.json'\\); console.log\\(p.version\\);\")",
+      "Bash(node -e \"const p=require\\('./node_modules/@angular/core/package.json'\\); console.log\\(p.version\\);\")",
+      "Bash(sed -i 's/import { IconComponent } from '\\\\''\\\\.\\\\.\\\\/\\\\.\\\\.\\\\/\\\\.\\\\.\\\\/\\\\.\\\\.\\\\/\\\\.\\\\.\\\\/shared\\\\/components\\\\/icon\\\\/icon\\\\.component'\\\\'';//g' src/app/features/dashboard/ui/pages/dashboard-page/dashboard-page.component.ts src/app/features/employees/ui/pages/departments/departments.component.ts src/app/features/roles/ui/pages/roles-page/roles-page.component.ts)",
+      "Bash(sed -i 's/, IconComponent//g' src/app/features/dashboard/ui/pages/dashboard-page/dashboard-page.component.ts src/app/features/roles/ui/pages/roles-page/roles-page.component.ts)",
+      "Bash(sed -i \"s/ButtonModule, InputTextModule, TextareaModule,/ButtonModule, InputTextModule, TextareaModule,\\\\n    /g\" src/app/features/employees/ui/pages/departments/departments.component.ts)",
+      "Bash(npm start *)",
+      "Bash(curl -s http://localhost:4200)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:4200)",
+      "Bash(npx playwright *)",
+      "Bash(node -e ' *)",
+      "Bash(cd /tmp)",
+      "Bash(npm root *)",
+      "Bash(npm ls *)",
+      "Bash(npx --yes node -e \"require.resolve\\('playwright/test'\\)\")",
+      "Bash(kill %1)",
+      "Bash(node -e \"try{require.resolve\\('playwright'\\)}catch\\(e\\){}\")",
+      "Bash(node *)",
+      "Bash(tr '\\\\\\\\' '/')",
+      "Bash(npx tsc *)",
+      "Bash(npx tail *)"
+    ]
+  }
+}

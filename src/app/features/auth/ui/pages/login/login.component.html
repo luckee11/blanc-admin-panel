@@ -1,0 +1,101 @@
+<div class="login">
+  <aside class="hero">
+    <div class="hero-top">
+      <div class="logo">
+        <img src="assets/blanc-logo.svg" alt="Blanc" class="logo-img" />
+        <div>
+          <div class="logo-sub">Self portal · Admin</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-content">
+      <h1>Управляйте людьми и процессами банка в одном месте.</h1>
+      <p>Сотрудники, ИПР, опросы, новости и рассылки — единый административный центр self-портала Blanc.</p>
+      <ul class="hero-list">
+        <li><ui-icon name="circle-check" /> Полный жизненный цикл сотрудника</li>
+        <li><ui-icon name="circle-check" /> Планы развития и обучение</li>
+        <li><ui-icon name="circle-check" /> Гибкая ролевая модель и аудит</li>
+      </ul>
+    </div>
+
+    <div class="hero-foot">© 2026 Blanc Bank · Internal system</div>
+  </aside>
+
+  <main class="form-side">
+    <div class="form-wrap">
+      <div class="welcome">
+        <h2>С возвращением</h2>
+        <p>Войдите по корпоративной почте, чтобы продолжить.</p>
+      </div>
+
+      <form (submit)="submit($event)" class="form" autocomplete="on" novalidate>
+
+        <!-- Email -->
+        <div class="field">
+          <label class="field-label" for="email">Email</label>
+          <p-iconfield>
+            <p-inputicon styleClass="pi pi-envelope" />
+            <input pInputText id="email" type="email"
+                   placeholder="ivan.ivanov@blanc.bank"
+                   [(ngModel)]="email" name="email"
+                   required autocomplete="email" autofocus
+                   class="login-input" />
+          </p-iconfield>
+        </div>
+
+        <!-- Пароль -->
+        <div class="field">
+          <div class="field-row">
+            <label class="field-label" for="password">Пароль</label>
+            <a class="link" href="#">Забыли пароль?</a>
+          </div>
+          <p-password
+            [(ngModel)]="password" name="password"
+            placeholder="Введите пароль"
+            [feedback]="false"
+            [toggleMask]="true"
+            [fluid]="true"
+            inputId="password"
+            autocomplete="current-password"
+            styleClass="login-password" />
+        </div>
+
+        <!-- skipAD -->
+        <label class="checkbox-row">
+          <p-checkbox [(ngModel)]="skipAD" name="skipAD" inputId="skipAD" [binary]="true" />
+          <span>Войти без Active Directory</span>
+        </label>
+
+        <!-- Ошибка -->
+        @if (error()) {
+          <div class="error-msg">
+            <i class="pi pi-exclamation-circle"></i>
+            {{ error() }}
+          </div>
+        }
+
+        <!-- Кнопка входа -->
+        <button type="submit" class="btn btn-primary login-btn" [disabled]="loading()">
+          @if (loading()) {
+            <i class="pi pi-spin pi-spinner"></i> Вход...
+          } @else {
+            Войти <i class="pi pi-arrow-right"></i>
+          }
+        </button>
+      </form>
+
+      <div class="divider"><span>или</span></div>
+
+      <button type="button" class="btn btn-secondary sso-btn">
+        <i class="pi pi-shield"></i>
+        Войти через корпоративный SSO
+      </button>
+
+      <p class="legal">
+        Используя систему, вы соглашаетесь с <a href="#">политикой безопасности</a> и
+        <a href="#">правилами обработки данных</a>.
+      </p>
+    </div>
+  </main>
+</div>

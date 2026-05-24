@@ -1,0 +1,99 @@
+<ui-page-header title="Новости" subtitle="Публикации для сотрудников в self-портале">
+  <p-button label="Создать новость" icon="pi pi-plus" (onClick)="openCreate()" />
+</ui-page-header>
+
+<div class="card">
+  <div class="toolbar">
+    <div class="search-input-wrap">
+      <i class="pi pi-search" style="position:absolute;left:12px;color:var(--c-text-muted);pointer-events:none"></i>
+      <input pInputText placeholder="Поиск по новостям..." [(ngModel)]="search" style="padding-left:36px" />
+    </div>
+    <p-select [options]="statusFilterOpts" [(ngModel)]="status"
+              optionLabel="label" optionValue="value" placeholder="Все статусы" />
+  </div>
+
+  <div class="news-list">
+    @for (n of filtered(); track n.id) {
+      <article class="news-item">
+        <div class="news-cover"><i class="pi pi-megaphone" style="font-size:22px;color:var(--c-accent)"></i></div>
+        <div class="news-body">
+          <div class="news-meta">
+            <span class="badge badge-info">{{ n.category }}</span>
+            <p-tag [value]="label(n.status)" [severity]="tagSeverity(n.status)" [rounded]="true" />
+            @if (n.pinned) { <span class="badge badge-warning">Закреплено</span> }
+          </div>
+          <h3 class="news-title">{{ n.title }}</h3>
+          <p class="news-excerpt">{{ n.excerpt }}</p>
+          <div class="news-foot">
+            <div class="news-author">
+              <p-avatar [label]="ini(n.author)" shape="circle" size="normal" />
+              <span>{{ n.author }}</span>
+            </div>
+            <span class="muted text-sm">· {{ fmt(n.publishDate) }}</span>
+            @if (n.views) { <span class="muted text-sm">· <i class="pi pi-eye" style="vertical-align:middle"></i> {{ n.views }}</span> }
+          </div>
+        </div>
+        <div class="news-actions">
+          <p-button icon="pi pi-eye"    rounded text severity="secondary" size="small" pTooltip="Просмотр"      tooltipPosition="top" (onClick)="openView(n)" />
+          <p-button icon="pi pi-pencil" rounded text severity="secondary" size="small" pTooltip="Редактировать" tooltipPosition="top" (onClick)="openEdit(n)" />
+          <p-button icon="pi pi-trash"  rounded text severity="danger"    size="small" pTooltip="Удалить"       tooltipPosition="top" (onClick)="openDelete(n)" />
+        </div>
+      </article>
+    } @empty {
+      <div class="empty-state">
+        <div class="icon-wrap"><i class="pi pi-megaphone" style="font-size:22px"></i></div>
+        <h3>Новости не созданы</h3>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Form modal -->
+<ui-modal [visible]="modal() === 'form'"
+          [title]="editing()?.id ? 'Редактирование новости' : 'Новая публикация'"
+          size="lg" (close)="closeModal()">
+  <div class="form-grid">
+    <div class="field full"><label class="field-label">Заголовок *</label><input pInputText [(ngModel)]="form.title" placeholder="Введите заголовок новости" /></div>
+    <div class="field"><label class="field-label">Категория</label><input pInputText [(ngModel)]="form.category" placeholder="HR, Продукт, События..." /></div>
+    <div class="field"><label class="field-label">Автор</label><input pInputText [(ngModel)]="form.author" /></div>
+    <div class="field full"><label class="field-label">Краткое описание</label><textarea pTextarea [(ngModel)]="form.excerpt" [rows]="2" [autoResize]="true" placeholder="Анонс, который увидят в ленте..."></textarea></div>
+    <div class="field full"><label class="field-label">Полный текст *</label><textarea pTextarea [(ngModel)]="form.body" [rows]="6" [autoResize]="false" style="min-height:160px"></textarea></div>
+    <div class="field">
+      <label class="field-label">Статус</label>
+      <p-select [options]="statusFormOpts" [(ngModel)]="form.status" optionLabel="label" optionValue="value" [fluid]="true" />
+    </div>
+    <div class="field"><label class="field-label">Дата публикации</label><input pInputText type="date" [(ngModel)]="form.publishDate" /></div>
+    <div class="field full">
+      <div class="p-checkbox-row">
+        <p-checkbox [(ngModel)]="form.pinned" [binary]="true" inputId="pinned" />
+        <label for="pinned">Закрепить вверху ленты</label>
+      </div>
+    </div>
+  </div>
+  <ng-container footer>
+    <p-button label="Отмена" severity="secondary" text (onClick)="closeModal()" />
+    <p-button label="Сохранить черновик" severity="secondary" (onClick)="saveAs(NewsStatus.Draft)" />
+    <p-button label="Опубликовать" icon="pi pi-send" (onClick)="saveAs(NewsStatus.Published)" [disabled]="!canSave()" />
+  </ng-container>
+</ui-modal>
+
+<!-- View modal -->
+<ui-modal [visible]="modal() === 'view' && editing() !== null"
+          [title]="editing()?.title ?? ''" size="lg" (close)="closeModal()">
+  @if (editing(); as e) {
+    <div class="news-meta view-meta">
+      <span class="badge badge-info">{{ e.category }}</span>
+      <p-tag [value]="label(e.status)" [severity]="tagSeverity(e.status)" [rounded]="true" />
+      <span class="muted text-sm">{{ fmt(e.publishDate) }} · {{ e.author }}</span>
+    </div>
+    <p class="news-body-text">{{ e.body }}</p>
+    <ng-container footer>
+      <p-button label="Закрыть" severity="secondary" text (onClick)="closeModal()" />
+      <p-button label="Редактировать" icon="pi pi-pencil" (onClick)="openEdit(e)" />
+    </ng-container>
+  }
+</ui-modal>
+
+<ui-confirm-delete [visible]="modal() === 'delete'"
+                   [entity]="editing()?.title ?? ''"
+                   (confirm)="doDelete()" (cancel)="closeModal()" />

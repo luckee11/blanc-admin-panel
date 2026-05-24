@@ -1,0 +1,9 @@
+<div class="plan-progress">
+  <div class="track">
+    <div class="bar"
+         [style.width.%]="plan().progress"
+         [style.background]="progressColor() || null">
+    </div>
+  </div>
+  <div class="label muted text-sm">{{ plan().tasksDone }} / {{ plan().tasksTotal }} задач · {{ plan().progress }}%</div>
+</div>

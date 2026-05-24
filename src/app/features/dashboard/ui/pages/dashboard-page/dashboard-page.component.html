@@ -1,0 +1,130 @@
+<ui-page-header title="Дашборд" subtitle="Быстрый обзор активности по сотрудникам, развитию и коммуникациям">
+  <p-button label="Экспорт отчёта" icon="pi pi-download" severity="secondary" />
+</ui-page-header>
+
+<div class="kpi-grid">
+  <app-kpi-card [value]="s().employees"    label="Активных сотрудников" icon="users"         delta="+4 за месяц"  deltaType="up"   iconColor="blue" />
+  <app-kpi-card [value]="s().activePlans"  label="Активных ИПР"         icon="target"        delta="+2 ИПР"       deltaType="up"   iconColor="gold" />
+  <app-kpi-card [value]="totalResponses()" label="Ответов в опросах"     icon="clipboard-list"                                     iconColor="emerald" />
+  <app-kpi-card [value]="s().overdueTasks" label="Просроченных задач ИПР" icon="circle-alert" [deltaType]="s().overdueTasks ? 'down' : ''" iconColor="red" />
+</div>
+
+<div class="grid-2 mt-24">
+  <!-- IPR таблица -->
+  <section class="card">
+    <div class="card-header">
+      <h3>Последние ИПР</h3>
+      <a class="link" routerLink="/ipr/plans">Все планы <i class="pi pi-arrow-right" style="font-size:12px"></i></a>
+    </div>
+    <div class="table-wrap">
+      <table class="tbl">
+        <thead><tr><th>Сотрудник</th><th>Цель</th><th>Прогресс</th><th>Статус</th></tr></thead>
+        <tbody>
+          @for (p of plans(); track p.id) {
+            <tr>
+              <td>
+                <div class="cell-emp">
+                  <p-avatar [label]="ini(p.employeeName)" shape="circle" />
+                  <div>
+                    <div class="fw-600">{{ p.employeeName }}</div>
+                    <div class="muted text-sm">{{ p.position }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="muted truncate goal-cell">{{ p.goal }}</td>
+              <td>
+                <p-progressBar [value]="p.progress" [showValue]="false" styleClass="dash-bar" />
+                <div class="muted text-sm progress-label">{{ p.progress }}%</div>
+              </td>
+              <td><p-tag [value]="label(p.status)" [severity]="tagSeverity(p.status)" [rounded]="true" /></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Опросы и новости -->
+  <section class="card">
+    <div class="card-header">
+      <h3>Опросы и коммуникации</h3>
+      <a class="link" routerLink="/surveys">К опросам <i class="pi pi-arrow-right" style="font-size:12px"></i></a>
+    </div>
+    <div class="row-list">
+      @for (s of surveys(); track s.id) {
+        <div class="row-item">
+          <div class="row-item-icon icon-emerald"><i class="pi pi-list" style="font-size:16px"></i></div>
+          <div class="row-body">
+            <div class="fw-600 truncate">{{ s.title }}</div>
+            <div class="muted text-sm">{{ s.audience }} · до {{ fmt(s.endDate) }}</div>
+          </div>
+          <div class="text-right">
+            <div class="fw-600">{{ s.responses }}/{{ s.totalRecipients }}</div>
+            <div class="muted text-sm">{{ percent(s.responses, s.totalRecipients) }}%</div>
+          </div>
+        </div>
+      }
+      <div class="divider-soft"></div>
+      @for (n of news(); track n.id) {
+        <div class="row-item">
+          <div class="row-item-icon icon-gold"><i class="pi pi-megaphone" style="font-size:16px"></i></div>
+          <div class="row-body">
+            <div class="fw-600 truncate">{{ n.title }}</div>
+            <div class="muted text-sm">{{ n.author }} · {{ fmt(n.publishDate) }}</div>
+          </div>
+          <p-tag [value]="label(n.status)" [severity]="tagSeverity(n.status)" [rounded]="true" />
+        </div>
+      }
+    </div>
+  </section>
+</div>
+
+<!-- Новые сотрудники (GET /api/admin/humans/recent) -->
+<section class="card mt-24">
+  <div class="card-header">
+    <h3>Новые сотрудники</h3>
+    <a class="link" routerLink="/employees/employed">Все сотрудники <i class="pi pi-arrow-right" style="font-size:12px"></i></a>
+  </div>
+  <div class="table-wrap">
+    <table class="tbl">
+      <thead>
+        <tr><th>Сотрудник</th><th>Должность</th><th>Отдел</th><th>Дата выхода</th><th>Статус</th></tr>
+      </thead>
+      <tbody>
+        @if (recentHumansLoading() && !recentHumans().length) {
+          @for (i of [1,2,3,4,5]; track i) {
+            <tr>
+              <td colspan="5">
+                <div class="skeleton-row">
+                  <p-skeleton shape="circle" size="32px" />
+                  <p-skeleton width="180px" height="14px" />
+                </div>
+              </td>
+            </tr>
+          }
+        } @else {
+          @for (e of recentHumans(); track e.id) {
+            <tr>
+              <td>
+                <div class="cell-emp">
+                  <p-avatar [label]="ini(e.fullName)" shape="circle" />
+                  <div class="fw-600">{{ e.fullName }}</div>
+                </div>
+              </td>
+              <td>{{ e.position }}</td>
+              <td>{{ e.squadName || '—' }}</td>
+              <td>{{ fmt(e.dateOfEmployment) }}</td>
+              <td><p-tag [value]="e.status" [severity]="humanStatusSeverity(e.status)" [rounded]="true" /></td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="muted" style="text-align:center; padding:20px">
+                Нет новых сотрудников
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

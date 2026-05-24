@@ -1,0 +1,158 @@
+<ui-page-header title="Письма" subtitle="Корпоративные рассылки сотрудникам">
+  <p-button label="Написать письмо" icon="pi pi-send" (onClick)="openCreate()" />
+</ui-page-header>
+
+<app-email-stats [emails]="emails()" style="display:block;margin-bottom:16px" />
+
+<div class="card prim-table-card">
+  <p-table #dt [value]="emails()" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10,25,50]"
+           [globalFilterFields]="['subject','body','recipients']"
+           sortMode="single" [showCurrentPageReport]="true"
+           currentPageReportTemplate="Показано {first}–{last} из {totalRecords}" dataKey="id">
+    <ng-template pTemplate="caption">
+      <div class="table-toolbar">
+        <p-iconfield>
+          <p-inputicon styleClass="pi pi-search" />
+          <input pInputText type="text" placeholder="Поиск по теме..." [(ngModel)]="globalFilter"
+                 (input)="dt.filterGlobal($any($event.target).value, 'contains')" />
+        </p-iconfield>
+        <p-select [options]="statusOptions" [(ngModel)]="selectedStatus"
+                  optionLabel="label" optionValue="value" placeholder="Все статусы"
+                  (onChange)="dt.filter(selectedStatus, 'status', 'equals')" />
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="subject" style="min-width:220px">Тема <p-sortIcon field="subject" /></th>
+        <th style="min-width:180px">Получатели</th>
+        <th style="min-width:140px">Автор</th>
+        <th style="min-width:150px">Дата</th>
+        <th style="min-width:120px">Статус</th>
+        <th style="width:100px; text-align:right">Действия</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-e>
+      <tr>
+        <td>
+          <div class="cell-mail">
+            <div class="mail-icon"><i class="pi pi-envelope" style="font-size:14px"></i></div>
+            <div>
+              <div class="fw-600">{{ e.subject }}</div>
+              @if (e.template) { <div class="muted text-sm">Шаблон: {{ e.template }}</div> }
+            </div>
+          </div>
+        </td>
+        <td>
+          <div>{{ e.recipients }}</div>
+          <div class="muted text-sm">{{ e.recipientCount }} получателей</div>
+        </td>
+        <td>{{ e.author }}</td>
+        <td class="text-sm">
+          @if (e.status === EmailStatus.Sent)      { Отправлено: {{ fmt(e.sentAt) }} }
+          @else if (e.status === EmailStatus.Scheduled) { На {{ fmt(e.scheduledAt) }} }
+          @else { — }
+        </td>
+        <td><p-tag [value]="label(e.status)" [severity]="tagSeverity(e.status)" [rounded]="true" /></td>
+        <td>
+          <div class="row-actions" style="justify-content:flex-end">
+            <p-button icon="pi pi-eye"    rounded text severity="secondary" size="small" pTooltip="Просмотр"      tooltipPosition="top" (onClick)="openView(e)" />
+            @if (e.status !== EmailStatus.Sent) {
+              <p-button icon="pi pi-pencil" rounded text severity="secondary" size="small" pTooltip="Редактировать" tooltipPosition="top" (onClick)="openEdit(e)" />
+            }
+            <p-button icon="pi pi-trash"  rounded text severity="danger"    size="small" pTooltip="Удалить"       tooltipPosition="top" (onClick)="openDelete(e)" />
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr><td colspan="6">
+        <div class="empty-state">
+          <div class="icon-wrap"><i class="pi pi-inbox" style="font-size:22px"></i></div>
+          <h3>Писем нет</h3>
+        </div>
+      </td></tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- Compose modal -->
+<ui-modal [visible]="modal() === 'form'"
+          [title]="editing()?.id ? 'Редактирование письма' : 'Новое письмо'"
+          size="lg" (close)="closeModal()">
+  <div class="compose">
+    <div class="field">
+      <label class="field-label">Кому *</label>
+      <p-select [options]="audiences" [(ngModel)]="audienceKey"
+                optionLabel="label" optionValue="value" [fluid]="true"
+                (onChange)="onAudienceChange()" />
+    </div>
+    <div class="field">
+      <label class="field-label">Тема письма *</label>
+      <input pInputText [(ngModel)]="form.subject" placeholder="Например: Изменения в графике работы" />
+    </div>
+    <div class="field">
+      <label class="field-label">Текст письма *</label>
+      <textarea pTextarea [(ngModel)]="form.body" [rows]="8" [autoResize]="false" style="min-height:200px" placeholder="Уважаемые коллеги,..."></textarea>
+      <div class="field-hint">Используйте {{ '{{name}}' }} для подстановки имени.</div>
+    </div>
+    <div class="field">
+      <label class="field-label">Отправить</label>
+      <div class="send-options">
+        <label class="send-opt" [class.active]="sendMode === 'now'">
+          <p-radioButton name="sendMode" value="now" [(ngModel)]="sendMode" inputId="send-now" />
+          <div>
+            <div class="fw-600"><i class="pi pi-send" style="font-size:13px"></i> Сразу</div>
+            <div class="muted text-sm">Письмо уйдёт сразу после сохранения</div>
+          </div>
+        </label>
+        <label class="send-opt" [class.active]="sendMode === 'schedule'">
+          <p-radioButton name="sendMode" value="schedule" [(ngModel)]="sendMode" inputId="send-schedule" />
+          <div>
+            <div class="fw-600"><i class="pi pi-calendar" style="font-size:13px"></i> По расписанию</div>
+            <div class="muted text-sm">Выбрать дату и время</div>
+          </div>
+        </label>
+      </div>
+      @if (sendMode === 'schedule') {
+        <input pInputText type="datetime-local" [(ngModel)]="form.scheduledAt" style="margin-top:8px" />
+      }
+    </div>
+    <div class="preview-banner">
+      <i class="pi pi-users" style="font-size:16px;color:var(--c-primary)"></i>
+      Будет отправлено <strong>{{ form.recipientCount }}</strong> получателям ·
+      <span class="muted">{{ form.recipients }}</span>
+    </div>
+  </div>
+  <ng-container footer>
+    <p-button label="Отмена" severity="secondary" text (onClick)="closeModal()" />
+    <p-button label="Сохранить черновик" severity="secondary" (onClick)="saveAsDraft()" />
+    <p-button [label]="sendMode === 'schedule' ? 'Запланировать' : 'Отправить'" icon="pi pi-send"
+              (onClick)="send()" [disabled]="!canSave()" />
+  </ng-container>
+</ui-modal>
+
+<!-- View modal -->
+<ui-modal [visible]="modal() === 'view' && editing() !== null"
+          [title]="editing()?.subject ?? ''" size="md" (close)="closeModal()">
+  @if (editing(); as e) {
+    <div class="kv view-kv">
+      <div><span>Получатели</span><b>{{ e.recipients }} ({{ e.recipientCount }})</b></div>
+      <div><span>Автор</span><b>{{ e.author }}</b></div>
+      <div><span>Статус</span><b><p-tag [value]="label(e.status)" [severity]="tagSeverity(e.status)" [rounded]="true" /></b></div>
+      <div><span>Дата</span><b>{{ fmt(e.sentAt || e.scheduledAt) }}</b></div>
+    </div>
+    <div class="mail-preview">
+      <p class="mail-body">{{ e.body }}</p>
+    </div>
+    <ng-container footer>
+      <p-button label="Закрыть" severity="secondary" text (onClick)="closeModal()" />
+      @if (e.status !== EmailStatus.Sent) {
+        <p-button label="Редактировать" icon="pi pi-pencil" (onClick)="openEdit(e)" />
+      }
+    </ng-container>
+  }
+</ui-modal>
+
+<ui-confirm-delete [visible]="modal() === 'delete'"
+                   [entity]="editing()?.subject ?? ''"
+                   (confirm)="doDelete()" (cancel)="closeModal()" />

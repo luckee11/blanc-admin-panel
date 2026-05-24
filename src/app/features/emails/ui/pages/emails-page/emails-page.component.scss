@@ -1,0 +1,123 @@
+.stats-row {
+  display: flex;
+  gap: 24px;
+  padding: 16px 20px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--c-text-muted);
+  font-size: 13px;
+
+  b {
+    color: var(--c-text);
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+  }
+  .stat-success { background: var(--c-success); }
+  .stat-info    { background: var(--c-info); }
+  .stat-neutral { background: #94a3b8; }
+  .stat-danger  { background: var(--c-danger); }
+}
+
+.cell-mail {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mail-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--c-primary-50);
+  color: var(--c-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.compose {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.audience-custom { margin-top: 8px; }
+.schedule-when   { margin-top: 8px; }
+
+.send-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 600px) {
+  .send-options { grid-template-columns: 1fr; }
+}
+
+.send-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--c-border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+
+  &:hover { border-color: var(--c-border-strong); }
+  &.active {
+    border-color: var(--c-primary-500);
+    background: rgba(37, 99, 235, .04);
+  }
+
+  input {
+    margin-top: 2px;
+    accent-color: var(--c-primary-500);
+  }
+}
+
+.preview-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--c-primary-50);
+  border: 1px solid rgba(37, 99, 235, .2);
+  border-radius: 10px;
+  color: var(--c-text);
+  font-size: 13px;
+
+  ui-icon { color: var(--c-primary); }
+}
+
+.textarea.long { min-height: 220px; }
+
+.view-kv { margin-bottom: 20px; }
+
+.mail-preview {
+  padding: 20px;
+  background: var(--c-surface-alt);
+  border-radius: 10px;
+}
+
+.mail-body {
+  white-space: pre-line;
+  line-height: 1.6;
+}

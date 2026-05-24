@@ -1,0 +1,6 @@
+<div class="stats-row">
+  <div class="stat"><span class="dot stat-success"></span><b>{{ count(EmailStatus.Sent) }}</b> отправлено</div>
+  <div class="stat"><span class="dot stat-info"></span><b>{{ count(EmailStatus.Scheduled) }}</b> запланировано</div>
+  <div class="stat"><span class="dot stat-neutral"></span><b>{{ count(EmailStatus.Draft) }}</b> черновиков</div>
+  <div class="stat"><span class="dot stat-danger"></span><b>{{ count(EmailStatus.Failed) }}</b> ошибок</div>
+</div>
