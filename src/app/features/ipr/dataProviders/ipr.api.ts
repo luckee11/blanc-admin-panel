@@ -12,6 +12,10 @@ import {
   IprPlan,
   SearchDevelopmentPlansRequest,
 } from '../models/interfaces/ipr-plan.interface';
+import {
+  DevelopmentPlanGroupDetailAnalytics,
+  DevelopmentPlansAnalytics,
+} from '../models/interfaces/development-plan-analytics.interface';
 import { IprTask } from '../models/interfaces/ipr-task.interface';
 
 const SEED_PLANS: IprPlan[] = [
@@ -42,6 +46,18 @@ export class IprApi {
     return this.http.post<DevelopmentPlansSearchResponse>(
       '/api/admin/development-plans/search',
       req,
+    );
+  }
+
+  /** GET /api/admin/development-plans/analytics — аналитика по планам развития. */
+  getDevelopmentPlansAnalytics(): Observable<DevelopmentPlansAnalytics> {
+    return this.http.get<DevelopmentPlansAnalytics>('/api/admin/development-plans/analytics');
+  }
+
+  /** GET /api/admin/development-plans/analytics/group/{groupId} — аналитика по группе. */
+  getGroupAnalytics(groupId: string): Observable<DevelopmentPlanGroupDetailAnalytics> {
+    return this.http.get<DevelopmentPlanGroupDetailAnalytics>(
+      `/api/admin/development-plans/analytics/group/${groupId}`,
     );
   }
 

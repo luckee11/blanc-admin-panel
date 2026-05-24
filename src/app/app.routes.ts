@@ -58,6 +58,18 @@ export const routes: Routes = [
             .then((m) => m.PlanDetailComponent),
       },
       {
+        path: 'ipr/analytics',
+        loadComponent: () =>
+          import('./features/ipr/ui/pages/analytics/analytics.component')
+            .then((m) => m.AnalyticsComponent),
+      },
+      {
+        path: 'ipr/analytics/group/:groupId',
+        loadComponent: () =>
+          import('./features/ipr/ui/pages/group-analytics/group-analytics.component')
+            .then((m) => m.GroupAnalyticsComponent),
+      },
+      {
         path: 'ipr/tasks',
         loadComponent: () =>
           import('./features/ipr/ui/pages/tasks/tasks.component')

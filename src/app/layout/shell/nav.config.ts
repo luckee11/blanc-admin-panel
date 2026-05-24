@@ -45,6 +45,7 @@ export const NAV: NavGroup[] = [
         children: [
           { label: 'Планы развития', link: '/ipr/plans' },
           { label: 'Задачи ИПР', link: '/ipr/tasks' },
+          { label: 'Аналитика', link: '/ipr/analytics' },
         ],
       },
       { label: 'Опросники', icon: 'clipboard-list', link: '/surveys' },

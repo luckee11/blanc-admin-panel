@@ -1,0 +1,133 @@
+<div class="detail-nav">
+  <p-button label="Назад к аналитике" icon="pi pi-arrow-left" severity="secondary" text (onClick)="back()" />
+</div>
+
+@if (loading() && !group()) {
+  <div class="kpi-row">
+    @for (i of [1,2,3,4]; track i) {
+      <div class="kpi"><p-skeleton width="60px" height="28px" /><p-skeleton width="120px" height="13px" styleClass="mt-8" /></div>
+    }
+  </div>
+}
+
+@if (group(); as g) {
+  <ui-page-header [title]="g.groupName" subtitle="Аналитика по группе" />
+
+  <!-- KPI -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-icon icon-emerald"><i class="pi pi-users"></i></div>
+      <div><div class="kpi-value">{{ g.totalEmployees }}</div><div class="kpi-label">Сотрудников</div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon icon-gold"><i class="pi pi-bullseye"></i></div>
+      <div><div class="kpi-value">{{ g.totalPlans }}</div><div class="kpi-label">Всего ИПР</div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon icon-blue"><i class="pi pi-cog"></i></div>
+      <div><div class="kpi-value">{{ g.activePlans }}</div><div class="kpi-label">Активных ИПР</div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon icon-blue"><i class="pi pi-sitemap"></i></div>
+      <div><div class="kpi-value">{{ g.squads.length }}</div><div class="kpi-label">Сквадов</div></div>
+    </div>
+  </div>
+
+  <!-- Статусы группы -->
+  <section class="card status-card">
+    <div class="card-header"><h3>Планы по статусам</h3></div>
+    <div class="status-grid">
+      @for (st of statuses; track st.key) {
+        <div class="status-item">
+          <span class="badge {{ st.badge }}">{{ st.label }}</span>
+          <span class="status-num">{{ planCount(g.statusCounts, st.key) }}</span>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Сквады -->
+  @for (sq of g.squads; track sq.squadId) {
+    <section class="card squad-card">
+      <div class="card-header squad-head">
+        <h3>{{ sq.squadName }}</h3>
+        <div class="squad-meta muted text-sm">
+          {{ sq.totalEmployees }} чел. · {{ sq.activePlans }}/{{ sq.totalPlans }} активных ИПР
+        </div>
+      </div>
+      <ng-container *ngTemplateOutlet="employeesTable; context: { $implicit: sq.employees }" />
+    </section>
+  }
+
+  <!-- Без сквада -->
+  @if (g.unassignedEmployees.length) {
+    <section class="card squad-card">
+      <div class="card-header squad-head">
+        <h3>Без сквада</h3>
+        <div class="squad-meta muted text-sm">{{ g.unassignedEmployees.length }} чел.</div>
+      </div>
+      <ng-container *ngTemplateOutlet="employeesTable; context: { $implicit: g.unassignedEmployees }" />
+    </section>
+  }
+}
+
+@if (!loading() && !group()) {
+  <div class="empty-state" style="padding:80px 20px">
+    <div class="icon-wrap"><i class="pi pi-chart-bar" style="font-size:24px"></i></div>
+    <h3>Аналитика по группе недоступна</h3>
+    <p>Не удалось загрузить данные или группа не найдена.</p>
+    <div style="margin-top:16px">
+      <p-button label="Назад к аналитике" icon="pi pi-arrow-left" severity="secondary" (onClick)="back()" />
+    </div>
+  </div>
+}
+
+<!-- Переиспользуемая таблица сотрудников -->
+<ng-template #employeesTable let-employees>
+  <div class="table-wrap">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>Сотрудник</th>
+          <th>Руководитель</th>
+          <th>ИПР (активн./всего)</th>
+          <th>Завершено</th>
+          <th>Годы</th>
+          <th>Последний статус</th>
+          <th>Пункты</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (e of employees; track e.employee?.id) {
+          <tr>
+            <td>
+              <div class="cell-emp">
+                @if (e.employee?.image) {
+                  <img class="emp-photo" [src]="e.employee?.image" [alt]="fullName(e.employee)" />
+                } @else {
+                  <p-avatar [label]="ini(e.employee)" shape="circle" />
+                }
+                <div class="fw-600">{{ fullName(e.employee) }}</div>
+              </div>
+            </td>
+            <td class="muted">{{ fullName(e.supervisor) }}</td>
+            <td>{{ e.activePlans }} / {{ e.totalPlans }}</td>
+            <td>{{ e.completedPlans }}</td>
+            <td class="muted">{{ e.years?.length ? e.years.join(', ') : '—' }}</td>
+            <td>
+              @if (e.latestPlanStatus) {
+                <span class="badge {{ statusBadge(e.latestPlanStatus) }}">{{ statusLabel(e.latestPlanStatus) }}</span>
+              } @else { <span class="muted">—</span> }
+            </td>
+            <td class="items-cell">
+              <p-progressBar [value]="progress(e.completedItems, e.totalItems)" [showValue]="false" styleClass="dash-bar" />
+              <div class="muted text-sm">{{ e.completedItems }}/{{ e.totalItems }} · {{ progress(e.completedItems, e.totalItems) }}%</div>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="7" class="muted" style="text-align:center; padding:16px">Нет сотрудников с ИПР</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</ng-template>

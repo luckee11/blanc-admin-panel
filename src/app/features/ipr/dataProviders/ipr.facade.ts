@@ -27,6 +27,14 @@ export class IprFacade {
   private _recentPlansLoading = signal(false);
   readonly recentPlansLoading = this._recentPlansLoading.asReadonly();
 
+  readonly analytics = this.store.analytics;
+  private _analyticsLoading = signal(false);
+  readonly analyticsLoading = this._analyticsLoading.asReadonly();
+
+  readonly groupAnalytics = this.store.groupAnalytics;
+  private _groupAnalyticsLoading = signal(false);
+  readonly groupAnalyticsLoading = this._groupAnalyticsLoading.asReadonly();
+
   constructor() {
     this.loadAll().subscribe();
   }
@@ -39,6 +47,30 @@ export class IprFacade {
       finalize(() => this._plansLoading.set(false)),
       map(() => undefined),
     );
+  }
+
+  /** Загрузка аналитики планов развития (GET /api/admin/development-plans/analytics). */
+  loadDevelopmentPlansAnalytics(): Observable<void> {
+    this._analyticsLoading.set(true);
+    return this.api.getDevelopmentPlansAnalytics().pipe(
+      tap((data) => this.store.setAnalytics(data)),
+      finalize(() => this._analyticsLoading.set(false)),
+      map(() => undefined),
+    );
+  }
+
+  /** Загрузка аналитики по группе (GET /api/admin/development-plans/analytics/group/{id}). */
+  loadGroupAnalytics(groupId: string): Observable<void> {
+    this._groupAnalyticsLoading.set(true);
+    return this.api.getGroupAnalytics(groupId).pipe(
+      tap((data) => this.store.setGroupAnalytics(data)),
+      finalize(() => this._groupAnalyticsLoading.set(false)),
+      map(() => undefined),
+    );
+  }
+
+  clearGroupAnalytics(): void {
+    this.store.clearGroupAnalytics();
   }
 
   /** Загрузка последних планов развития (GET /api/admin/development-plans/recent), по умолчанию 5. */

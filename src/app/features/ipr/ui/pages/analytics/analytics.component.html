@@ -1,0 +1,88 @@
+<ui-page-header title="Аналитика ИПР" subtitle="Сводка по планам развития и группам">
+  <p-button label="Обновить" icon="pi pi-refresh" severity="secondary" (onClick)="refresh()" />
+</ui-page-header>
+
+@if (loading() && !analytics()) {
+  <div class="kpi-row">
+    @for (i of [1,2,3,4]; track i) {
+      <div class="kpi"><p-skeleton width="60px" height="28px" /><p-skeleton width="120px" height="13px" styleClass="mt-8" /></div>
+    }
+  </div>
+}
+
+@if (analytics(); as a) {
+  <!-- KPI -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-icon icon-blue"><i class="pi pi-sitemap"></i></div>
+      <div><div class="kpi-value">{{ a.totalGroups }}</div><div class="kpi-label">Групп</div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon icon-emerald"><i class="pi pi-users"></i></div>
+      <div><div class="kpi-value">{{ a.totalEmployees }}</div><div class="kpi-label">Сотрудников</div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon icon-gold"><i class="pi pi-bullseye"></i></div>
+      <div><div class="kpi-value">{{ a.totalPlans }}</div><div class="kpi-label">Всего ИПР</div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon icon-blue"><i class="pi pi-spin pi-cog"></i></div>
+      <div><div class="kpi-value">{{ a.activePlans }}</div><div class="kpi-label">Активных ИПР</div></div>
+    </div>
+  </div>
+
+  <!-- Статусы -->
+  <section class="card status-card">
+    <div class="card-header"><h3>Планы по статусам</h3></div>
+    <div class="status-grid">
+      @for (st of statuses; track st.key) {
+        <div class="status-item">
+          <span class="badge {{ st.badge }}">{{ st.label }}</span>
+          <span class="status-num">{{ count(a.statusCounts, st.key) }}</span>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Группы -->
+  <section class="card">
+    <div class="card-header"><h3>По группам ({{ a.groups.length }})</h3></div>
+    <div class="table-wrap">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Группа</th>
+            <th>Сотрудников</th>
+            <th>Всего ИПР</th>
+            <th>Активных</th>
+            <th>По статусам</th>
+            <th style="width:40px"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (g of a.groups; track g.groupId) {
+            <tr class="row-link" (click)="openGroup(g.groupId)">
+              <td class="fw-600">{{ g.groupName }}</td>
+              <td>{{ g.totalEmployees }}</td>
+              <td>{{ g.totalPlans }}</td>
+              <td>{{ g.activePlans }}</td>
+              <td>
+                <div class="group-statuses">
+                  @for (st of statuses; track st.key) {
+                    @if (count(g.statusCounts, st.key) > 0) {
+                      <span class="badge {{ st.badge }}">{{ st.label }}: {{ count(g.statusCounts, st.key) }}</span>
+                    }
+                  }
+                  @if (g.totalPlans === 0) { <span class="muted text-sm">—</span> }
+                </div>
+              </td>
+              <td class="td-arrow"><i class="pi pi-chevron-right"></i></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="muted" style="text-align:center; padding:20px">Нет данных по группам</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+}

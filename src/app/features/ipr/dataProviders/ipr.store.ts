@@ -5,6 +5,10 @@ import {
   DevelopmentPlansSearchResponse,
   IprPlan,
 } from '../models/interfaces/ipr-plan.interface';
+import {
+  DevelopmentPlanGroupDetailAnalytics,
+  DevelopmentPlansAnalytics,
+} from '../models/interfaces/development-plan-analytics.interface';
 import { IprTask } from '../models/interfaces/ipr-task.interface';
 
 export interface DevelopmentPlansPagination {
@@ -29,6 +33,17 @@ export class IprStore {
   private _recentDevelopmentPlans = signal<DevelopmentPlanListItem[]>([]);
   readonly recentDevelopmentPlans = this._recentDevelopmentPlans.asReadonly();
   setRecentDevelopmentPlans(items: DevelopmentPlanListItem[]) { this._recentDevelopmentPlans.set(items); }
+
+  /** Аналитика планов развития (GET /api/admin/development-plans/analytics). */
+  private _analytics = signal<DevelopmentPlansAnalytics | null>(null);
+  readonly analytics = this._analytics.asReadonly();
+  setAnalytics(data: DevelopmentPlansAnalytics) { this._analytics.set(data); }
+
+  /** Аналитика по группе (GET /api/admin/development-plans/analytics/group/{id}). */
+  private _groupAnalytics = signal<DevelopmentPlanGroupDetailAnalytics | null>(null);
+  readonly groupAnalytics = this._groupAnalytics.asReadonly();
+  setGroupAnalytics(data: DevelopmentPlanGroupDetailAnalytics) { this._groupAnalytics.set(data); }
+  clearGroupAnalytics() { this._groupAnalytics.set(null); }
 
   private _plansPagination = signal<DevelopmentPlansPagination | null>(null);
   readonly plansPagination = this._plansPagination.asReadonly();
