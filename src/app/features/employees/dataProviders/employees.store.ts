@@ -2,7 +2,6 @@ import { Injectable, signal } from '@angular/core';
 import { Employee } from '../models/interfaces/employee.interface';
 import { Department } from '../models/interfaces/department.interface';
 import { Squad } from '../models/interfaces/squad.interface';
-import { Contact } from '../models/interfaces/contact.interface';
 import { Human, HumanDetail, HumansSearchResponse, RecentHuman } from '../models/interfaces/human.interface';
 
 export interface HumansPagination {
@@ -75,13 +74,4 @@ export class EmployeesStore {
   readonly squads = this._squads.asReadonly();
 
   setSquads(items: Squad[]) { this._squads.set(items); }
-
-  /* ===== Contacts ===== */
-  private _contacts = signal<Contact[]>([]);
-  readonly contacts = this._contacts.asReadonly();
-
-  setContacts(items: Contact[]) { this._contacts.set(items); }
-  addContact(c: Contact) { this._contacts.update((l) => [c, ...l]); }
-  updateContact(c: Contact) { this._contacts.update((l) => l.map((x) => x.id === c.id ? c : x)); }
-  removeContact(id: string) { this._contacts.update((l) => l.filter((x) => x.id !== id)); }
 }

@@ -4,7 +4,6 @@ import { EmployeesApi } from './employees.api';
 import { EmployeesStore } from './employees.store';
 import { Employee } from '../models/interfaces/employee.interface';
 import { Department } from '../models/interfaces/department.interface';
-import { Contact } from '../models/interfaces/contact.interface';
 import { Human, HumansSearchRequest, UpdateHumanRequest } from '../models/interfaces/human.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -104,7 +103,6 @@ export class EmployeesFacade {
   /* ===== Employees (mock CRUD) ===== */
   readonly employees   = this.store.employees;
   readonly departments = this.store.departments;
-  readonly contacts    = this.store.contacts;
 
   constructor() {
     this.loadSupportData().subscribe();
@@ -114,12 +112,10 @@ export class EmployeesFacade {
     return forkJoin([
       this.api.listEmployees(),
       this.api.listDepartments(),
-      this.api.listContacts(),
     ]).pipe(
-      tap(([emps, depts, contacts]) => {
+      tap(([emps, depts]) => {
         this.store.setEmployees(emps);
         this.store.setDepartments(depts);
-        this.store.setContacts(contacts);
       }),
       map(() => undefined),
     );
@@ -143,15 +139,5 @@ export class EmployeesFacade {
   }
   deleteDepartment(id: string): Observable<void> {
     return this.api.deleteDepartment(id).pipe(tap(() => this.store.removeDepartment(id)));
-  }
-
-  createContact(c: Omit<Contact, 'id'>): Observable<Contact> {
-    return this.api.createContact(c).pipe(tap((item) => this.store.addContact(item)));
-  }
-  updateContact(c: Contact): Observable<Contact> {
-    return this.api.updateContact(c).pipe(tap((item) => this.store.updateContact(item)));
-  }
-  deleteContact(id: string): Observable<void> {
-    return this.api.deleteContact(id).pipe(tap(() => this.store.removeContact(id)));
   }
 }

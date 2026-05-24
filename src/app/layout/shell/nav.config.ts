@@ -32,7 +32,6 @@ export const NAV: NavGroup[] = [
         children: [
           { label: 'Трудоустроенные', link: '/employees/employed' },
           { label: 'Отделы', link: '/employees/departments' },
-          { label: 'Контакты', link: '/employees/contacts' },
         ],
       },
     ],

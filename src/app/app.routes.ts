@@ -42,12 +42,6 @@ export const routes: Routes = [
           import('./features/employees/ui/pages/departments/departments.component')
             .then((m) => m.DepartmentsComponent),
       },
-      {
-        path: 'employees/contacts',
-        loadComponent: () =>
-          import('./features/employees/ui/pages/contacts/contacts.component')
-            .then((m) => m.ContactsComponent),
-      },
 
       /* ===== IPR ===== */
       { path: 'ipr', pathMatch: 'full', redirectTo: 'ipr/plans' },

@@ -10,11 +10,9 @@ import {
   UpdateHumanRequest,
 } from '../models/interfaces/human.interface';
 import { EmploymentStatus } from '../enums/employment-status.enum';
-import { ContactType } from '../enums/contact-type.enum';
 import { Employee } from '../models/interfaces/employee.interface';
 import { Department } from '../models/interfaces/department.interface';
 import { Squad } from '../models/interfaces/squad.interface';
-import { Contact } from '../models/interfaces/contact.interface';
 
 const SEED_EMPLOYEES: Employee[] = [
   { id: makeId(), fullName: 'Анна Соколова', position: 'HR Business Partner', department: 'HR', email: 'a.sokolova@blanc.bank', phone: '+7 (495) 110-22-01', hireDate: '2022-03-14', status: EmploymentStatus.Active, manager: 'Илья Громов', city: 'Москва' },
@@ -34,14 +32,6 @@ const SEED_DEPARTMENTS: Department[] = [
   { id: makeId(), name: 'Маркетинг', code: 'MKT', head: 'Ольга Сергеева', headcount: 21, description: 'Бренд, коммуникации, performance' },
   { id: makeId(), name: 'Продукт', code: 'PROD', head: 'Артём Никитин', headcount: 27, description: 'Продуктовые команды self-портала' },
   { id: makeId(), name: 'Юридический', code: 'LEG', head: 'Виктор Малышев', headcount: 11, description: 'Правовое сопровождение' },
-];
-
-const SEED_CONTACTS: Contact[] = [
-  { id: makeId(), name: 'Анна Соколова', position: 'HRBP', email: 'a.sokolova@blanc.bank', phone: '+7 (495) 110-22-01', department: 'HR', type: ContactType.Internal },
-  { id: makeId(), name: 'Илья Громов', position: 'Директор по персоналу', email: 'i.gromov@blanc.bank', phone: '+7 (495) 110-22-00', department: 'HR', type: ContactType.Internal },
-  { id: makeId(), name: 'Алексей Сидоров', position: 'Юрист', email: 'a.sidorov@partner.ru', phone: '+7 (812) 555-12-34', department: 'Юридический', type: ContactType.Partner },
-  { id: makeId(), name: 'Поддержка HRM', position: 'Сервис', email: 'support@hrm-system.ru', phone: '+7 (800) 100-20-30', department: 'Внешние сервисы', type: ContactType.External },
-  { id: makeId(), name: 'Сергей Беляев', position: 'CTO', email: 's.belyaev@blanc.bank', phone: '+7 (495) 110-22-50', department: 'IT', type: ContactType.Internal },
 ];
 
 @Injectable({ providedIn: 'root' })
@@ -89,8 +79,4 @@ export class EmployeesApi {
   updateDepartment(d: Department): Observable<Department> { return of(d); }
   deleteDepartment(_id: string): Observable<void> { return of(undefined); }
 
-  listContacts(): Observable<Contact[]> { return of(SEED_CONTACTS); }
-  createContact(c: Omit<Contact, 'id'>): Observable<Contact> { return of({ ...c, id: makeId() }); }
-  updateContact(c: Contact): Observable<Contact> { return of(c); }
-  deleteContact(_id: string): Observable<void> { return of(undefined); }
 }
