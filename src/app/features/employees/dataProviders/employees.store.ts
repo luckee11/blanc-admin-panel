@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { Employee } from '../models/interfaces/employee.interface';
 import { Department } from '../models/interfaces/department.interface';
+import { Squad } from '../models/interfaces/squad.interface';
 import { Contact } from '../models/interfaces/contact.interface';
 import { Human, HumanDetail, HumansSearchResponse, RecentHuman } from '../models/interfaces/human.interface';
 
@@ -68,6 +69,12 @@ export class EmployeesStore {
   addDepartment(d: Department) { this._departments.update((l) => [d, ...l]); }
   updateDepartment(d: Department) { this._departments.update((l) => l.map((x) => x.id === d.id ? d : x)); }
   removeDepartment(id: string) { this._departments.update((l) => l.filter((x) => x.id !== id)); }
+
+  /* ===== Squads (отделы — реальный API /api/admin/squads) ===== */
+  private _squads = signal<Squad[]>([]);
+  readonly squads = this._squads.asReadonly();
+
+  setSquads(items: Squad[]) { this._squads.set(items); }
 
   /* ===== Contacts ===== */
   private _contacts = signal<Contact[]>([]);

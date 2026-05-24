@@ -1,87 +1,69 @@
 <ui-page-header title="Отделы" subtitle="Организационная структура банка">
-  <p-button label="Создать отдел" icon="pi pi-plus" (onClick)="openCreate()" />
+  <p-button label="Обновить" icon="pi pi-refresh" severity="secondary" (onClick)="refresh()" />
 </ui-page-header>
 
-<div class="grid">
-  @for (d of filtered(); track d.id) {
-    <div class="dept-card">
-      <div class="dept-top">
-        <div class="dept-code">{{ d.code }}</div>
-        <div class="dept-actions">
-          <p-button icon="pi pi-eye"    rounded text severity="secondary" size="small" pTooltip="Просмотр"      tooltipPosition="top" (onClick)="openView(d)" />
-          <p-button icon="pi pi-pencil" rounded text severity="secondary" size="small" pTooltip="Редактировать" tooltipPosition="top" (onClick)="openEdit(d)" />
-          <p-button icon="pi pi-trash"  rounded text severity="danger"    size="small" pTooltip="Удалить"       tooltipPosition="top" (onClick)="openDelete(d)" />
-        </div>
-      </div>
-      <h3 class="dept-name">{{ d.name }}</h3>
-      <p class="dept-desc">{{ d.description || 'Описание не указано' }}</p>
-      <div class="dept-row">
-        <p-avatar [label]="ini(d.head)" shape="circle" />
-        <div>
-          <div class="muted text-sm">Руководитель</div>
-          <div class="fw-600">{{ d.head }}</div>
-        </div>
-      </div>
-      <div class="dept-stats">
-        <div><i class="pi pi-users" style="font-size:14px"></i> {{ d.headcount }} чел.</div>
-        @if (d.parent) { <div><i class="pi pi-building" style="font-size:14px"></i> {{ d.parent }}</div> }
-      </div>
-    </div>
-  } @empty {
-    <div class="empty-full">
-      <div class="empty-state">
-        <div class="icon-wrap"><i class="pi pi-building" style="font-size:22px"></i></div>
-        <h3>Отделы не созданы</h3>
-        <p>Добавьте первый отдел, чтобы начать.</p>
-      </div>
-    </div>
-  }
+<div class="dept-toolbar">
+  <p-iconfield>
+    <p-inputicon styleClass="pi pi-search" />
+    <input pInputText type="text" placeholder="Поиск по отделу, руководителю, куратору или сотруднику..."
+           [(ngModel)]="searchKeyword" (input)="onSearchInput()" />
+  </p-iconfield>
 </div>
 
-<!-- Form modal -->
-<ui-modal [visible]="modal() === 'form'"
-          [title]="editing()?.id ? 'Редактирование отдела' : 'Новый отдел'"
-          size="md" (close)="closeModal()">
-  <div class="form-grid">
-    <div class="field"><label class="field-label">Название *</label><input pInputText [(ngModel)]="form.name" /></div>
-    <div class="field"><label class="field-label">Код *</label><input pInputText [(ngModel)]="form.code" placeholder="HR, IT, FIN..." /></div>
-    <div class="field"><label class="field-label">Руководитель *</label><input pInputText [(ngModel)]="form.head" /></div>
-    <div class="field"><label class="field-label">Родительский отдел</label><input pInputText [(ngModel)]="form.parent" /></div>
-    <div class="field"><label class="field-label">Численность</label><input pInputText type="number" min="0" [(ngModel)]="form.headcount" /></div>
-    <div class="field full"><label class="field-label">Описание</label><textarea pTextarea [(ngModel)]="form.description" [rows]="3" [autoResize]="true"></textarea></div>
-  </div>
-  <ng-container footer>
-    <p-button label="Отмена" severity="secondary" text (onClick)="closeModal()" />
-    <p-button [label]="editing()?.id ? 'Сохранить' : 'Создать'" (onClick)="save()" [disabled]="!canSave()" />
-  </ng-container>
-</ui-modal>
-
-<!-- View modal -->
-<ui-modal [visible]="modal() === 'view' && editing() !== null"
-          [title]="editing()?.name ?? ''" size="md" (close)="closeModal()">
-  @if (editing(); as e) {
-    <div class="dept-row dept-view-row">
-      <p-avatar [label]="ini(e.head)" shape="circle" size="large" />
-      <div>
-        <div class="muted text-sm">Руководитель</div>
-        <div class="fw-600 text-lg">{{ e.head }}</div>
+@if (loading()) {
+  <div class="grid">
+    @for (i of [1,2,3,4,5,6]; track i) {
+      <div class="dept-card">
+        <p-skeleton width="60%" height="20px" />
+        <p-skeleton width="40%" height="14px" styleClass="mt-8" />
+        <p-skeleton width="100%" height="48px" styleClass="mt-8" />
+        <p-skeleton width="100%" height="48px" />
       </div>
-    </div>
-    <div class="kv">
-      <div><span>Код</span><b>{{ e.code }}</b></div>
-      <div><span>Численность</span><b>{{ e.headcount }} чел.</b></div>
-      <div><span>Родительский отдел</span><b>{{ e.parent || '—' }}</b></div>
-    </div>
-    @if (e.description) {
-      <p class="dept-view-desc">{{ e.description }}</p>
     }
-    <ng-container footer>
-      <p-button label="Закрыть" severity="secondary" text (onClick)="closeModal()" />
-      <p-button label="Редактировать" icon="pi pi-pencil" (onClick)="openEdit(e)" />
-    </ng-container>
-  }
-</ui-modal>
+  </div>
+} @else {
+  <div class="grid">
+    @for (s of squads(); track s.id) {
+      <div class="dept-card">
+        <div class="dept-top">
+          <h3 class="dept-name">{{ s.name }}</h3>
+          <span class="dept-count"><i class="pi pi-users" style="font-size:13px"></i> {{ s.employeeCount }}</span>
+        </div>
 
-<ui-confirm-delete [visible]="modal() === 'delete'"
-                   [entity]="editing()?.name ?? ''"
-                   (confirm)="doDelete()" (cancel)="closeModal()" />
+        <div class="dept-row">
+          <p-avatar [label]="ini(s.supervisor)" shape="circle" />
+          <div>
+            <div class="muted text-sm">Руководитель</div>
+            <div class="fw-600">{{ personName(s.supervisor) }}</div>
+          </div>
+        </div>
+
+        @if (s.curator) {
+          <div class="dept-row">
+            <p-avatar [label]="ini(s.curator)" shape="circle" />
+            <div>
+              <div class="muted text-sm">Куратор</div>
+              <div class="fw-600">{{ personName(s.curator) }}</div>
+            </div>
+          </div>
+        } @else {
+          <div class="dept-row dept-row-empty">
+            <p-avatar icon="pi pi-user-minus" shape="circle" styleClass="avatar-empty" />
+            <div>
+              <div class="muted text-sm">Куратор</div>
+              <div class="muted fw-600">Не назначен</div>
+            </div>
+          </div>
+        }
+      </div>
+    } @empty {
+      <div class="empty-full">
+        <div class="empty-state">
+          <div class="icon-wrap"><i class="pi pi-building" style="font-size:22px"></i></div>
+          <h3>Отделы не найдены</h3>
+          <p>Список пуст или данные ещё не загружены.</p>
+        </div>
+      </div>
+    }
+  </div>
+}

@@ -1,70 +1,66 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnDestroy, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea';
 import { AvatarModule } from 'primeng/avatar';
-import { TooltipModule } from 'primeng/tooltip';
+import { SkeletonModule } from 'primeng/skeleton';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 
-import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
-import { ConfirmDeleteComponent } from '../../../../../shared/components/confirm-delete/confirm-delete.component';
 import { initialsOf } from '../../../../../shared/utils/text';
 import { EmployeesFacade } from '../../../dataProviders/employees.facade';
-import { Department } from '../../../models/interfaces/department.interface';
+import { SquadPerson } from '../../../models/interfaces/squad.interface';
 
 @Component({
   selector: 'app-departments',
   standalone: true,
   imports: [
-    FormsModule, ButtonModule, InputTextModule, TextareaModule,
-    AvatarModule, TooltipModule,
-    ModalComponent, PageHeaderComponent, ConfirmDeleteComponent,
+    FormsModule,
+    ButtonModule, InputTextModule, AvatarModule, SkeletonModule,
+    IconFieldModule, InputIconModule,
+    PageHeaderComponent,
   ],
   templateUrl: './departments.component.html',
   styleUrl: './departments.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DepartmentsComponent {
+export class DepartmentsComponent implements OnInit, OnDestroy {
   private facade     = inject(EmployeesFacade);
   private destroyRef = inject(DestroyRef);
 
-  departments = this.facade.departments;
-  filtered = computed(() => this.departments());
+  squads  = this.facade.squads;
+  loading = this.facade.squadsLoading;
 
-  modal = signal<'form' | 'view' | 'delete' | null>(null);
-  editing = signal<Department | null>(null);
-  form: Department = this.empty();
+  searchKeyword = '';
+  private searchTimer: ReturnType<typeof setTimeout> | null = null;
 
-  empty(): Department {
-    return { id: '', name: '', code: '', head: '', headcount: 0, parent: '', description: '' };
+  ngOnInit(): void {
+    this.refresh();
   }
 
-  canSave() { return !!(this.form.name && this.form.code && this.form.head); }
-
-  openCreate() { this.form = this.empty(); this.editing.set(null); this.modal.set('form'); }
-  openEdit(d: Department) { this.form = { ...d }; this.editing.set(d); this.modal.set('form'); }
-  openView(d: Department) { this.editing.set(d); this.modal.set('view'); }
-  openDelete(d: Department) { this.editing.set(d); this.modal.set('delete'); }
-  closeModal() { this.modal.set(null); this.editing.set(null); }
-
-  save() {
-    if (!this.canSave()) return;
-    this.form.headcount = Number(this.form.headcount) || 0;
-    const op$ = this.editing()?.id
-      ? this.facade.updateDepartment(this.form)
-      : this.facade.createDepartment(this.form);
-    op$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.closeModal());
+  ngOnDestroy(): void {
+    if (this.searchTimer) clearTimeout(this.searchTimer);
   }
 
-  doDelete() {
-    const d = this.editing();
-    if (!d) { this.closeModal(); return; }
-    this.facade.deleteDepartment(d.id)
+  onSearchInput(): void {
+    if (this.searchTimer) clearTimeout(this.searchTimer);
+    this.searchTimer = setTimeout(() => this.refresh(), 400);
+  }
+
+  refresh(): void {
+    this.facade.loadSquads(this.searchKeyword.trim() || undefined)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.closeModal());
+      .subscribe();
   }
 
-  ini(n: string) { return initialsOf(n); }
+  personName(p?: SquadPerson | null): string {
+    return p?.fullName?.trim() || '—';
+  }
+
+  ini(p?: SquadPerson | null): string {
+    if (!p) return '';
+    return initialsOf(p.fullName || `${p.firstName ?? ''} ${p.lastName ?? ''}`);
+  }
 }

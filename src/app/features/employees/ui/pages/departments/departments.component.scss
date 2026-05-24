@@ -1,3 +1,9 @@
+.dept-toolbar {
+  margin-bottom: 16px;
+  p-iconfield { display: block; max-width: 480px; }
+  input { width: 100%; }
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -27,7 +33,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
 }
+
+.dept-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  height: 24px;
+  padding: 0 10px;
+  background: var(--c-primary-50);
+  color: var(--c-primary);
+  font-weight: 600;
+  font-size: 13px;
+  border-radius: 6px;
+}
+
+:host ::ng-deep .mt-8 { margin-top: 8px; }
 
 .dept-code {
   display: inline-flex;
@@ -66,6 +89,16 @@
   padding: 12px;
   background: var(--c-surface-alt);
   border-radius: 10px;
+}
+
+/* Состояние «куратор не назначен» */
+.dept-row-empty {
+  background: transparent;
+  border: 1px dashed var(--c-border);
+}
+:host ::ng-deep .avatar-empty {
+  background: var(--c-surface-alt);
+  color: var(--c-text-muted);
 }
 
 .dept-stats {

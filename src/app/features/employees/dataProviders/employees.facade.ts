@@ -86,6 +86,21 @@ export class EmployeesFacade {
     );
   }
 
+  /* ===== Squads (отделы — GET /api/admin/squads) ===== */
+  readonly squads = this.store.squads;
+
+  private _squadsLoading = signal(false);
+  readonly squadsLoading = this._squadsLoading.asReadonly();
+
+  loadSquads(search?: string): Observable<void> {
+    this._squadsLoading.set(true);
+    return this.api.getSquads(search).pipe(
+      tap((list) => this.store.setSquads(list)),
+      finalize(() => this._squadsLoading.set(false)),
+      map(() => undefined),
+    );
+  }
+
   /* ===== Employees (mock CRUD) ===== */
   readonly employees   = this.store.employees;
   readonly departments = this.store.departments;

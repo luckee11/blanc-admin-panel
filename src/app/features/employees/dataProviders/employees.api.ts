@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { makeId } from '../../../shared/utils/text';
 import {
@@ -13,6 +13,7 @@ import { EmploymentStatus } from '../enums/employment-status.enum';
 import { ContactType } from '../enums/contact-type.enum';
 import { Employee } from '../models/interfaces/employee.interface';
 import { Department } from '../models/interfaces/department.interface';
+import { Squad } from '../models/interfaces/squad.interface';
 import { Contact } from '../models/interfaces/contact.interface';
 
 const SEED_EMPLOYEES: Employee[] = [
@@ -66,6 +67,15 @@ export class EmployeesApi {
 
   getRecentHumans(): Observable<RecentHuman[]> {
     return this.http.get<RecentHuman[]>('/api/admin/humans/recent');
+  }
+
+  /**
+   * GET /api/admin/squads — отделы/группы.
+   * search — поиск по руководителю, куратору, названию отдела или сотруднику.
+   */
+  getSquads(search?: string): Observable<Squad[]> {
+    const params = search ? new HttpParams().set('search', search) : undefined;
+    return this.http.get<Squad[]>('/api/admin/squads', { params });
   }
 
   /* ===== Mock: employees CRUD ===== */
