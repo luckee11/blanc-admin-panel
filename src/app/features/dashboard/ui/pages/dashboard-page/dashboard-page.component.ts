@@ -13,7 +13,8 @@ import { initialsOf } from '../../../../../shared/utils/text';
 import { DashboardFacade } from '../../../dataProviders/dashboard.facade';
 import { KpiCardComponent } from '../../components/kpi-card/kpi-card.component';
 import { IprStatus } from '../../../../ipr/enums/ipr-status.enum';
-import { getIprStatusLabel } from '../../../../ipr/utils/functions/ipr.functions';
+import { calcProgress, getIprStatusLabel } from '../../../../ipr/utils/functions/ipr.functions';
+import { DevelopmentPlanEmployee } from '../../../../ipr/models/interfaces/ipr-plan.interface';
 import { getEmploymentStatusLabel, getHumanStatusSeverity } from '../../../../employees/utils/functions/employees.functions';
 import { EmploymentStatus } from '../../../../employees/enums/employment-status.enum';
 import { NewsStatus } from '../../../../news/enums/news-status.enum';
@@ -35,6 +36,7 @@ export class DashboardPageComponent implements OnInit {
 
   s = this.facade.stats;
   plans = this.facade.recentPlans;
+  plansLoading = this.facade.recentPlansLoading;
   surveys = this.facade.activeSurveys;
   news = this.facade.upcomingNews;
   recentHumans        = this.facade.recentHumans;
@@ -45,7 +47,21 @@ export class DashboardPageComponent implements OnInit {
     this.facade.loadRecentHumans()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
+    this.facade.loadRecentDevelopmentPlans()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
   }
+
+  /** ФИО сотрудника плана развития. */
+  planEmployeeName(e?: DevelopmentPlanEmployee | null): string {
+    if (!e) return '—';
+    return [e.lastName, e.firstName, e.patronymic].filter(Boolean).join(' ') || '—';
+  }
+  planEmployeeIni(e?: DevelopmentPlanEmployee | null): string {
+    if (!e) return '';
+    return initialsOf(`${e.firstName ?? ''} ${e.lastName ?? ''}`);
+  }
+  planProgress(completed: number, total: number): number { return calcProgress(completed, total); }
 
   ini(n: string) { return initialsOf(n); }
   fmt(d: string | null | undefined) { return d ? formatDate(d) : '—'; }

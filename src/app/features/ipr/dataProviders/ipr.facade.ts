@@ -15,6 +15,7 @@ export class IprFacade {
 
   readonly plans = this.store.plans;
   readonly developmentPlans = this.store.developmentPlans;
+  readonly recentDevelopmentPlans = this.store.recentDevelopmentPlans;
   readonly plansPagination = this.store.plansPagination;
   readonly selectedPlan = this.store.selectedPlan;
   readonly selectedPlanLoading = this.store.selectedPlanLoading;
@@ -22,6 +23,9 @@ export class IprFacade {
 
   private _plansLoading = signal(false);
   readonly plansLoading = this._plansLoading.asReadonly();
+
+  private _recentPlansLoading = signal(false);
+  readonly recentPlansLoading = this._recentPlansLoading.asReadonly();
 
   constructor() {
     this.loadAll().subscribe();
@@ -33,6 +37,16 @@ export class IprFacade {
     return this.api.searchDevelopmentPlans(req).pipe(
       tap((res) => this.store.setDevelopmentPlans(res)),
       finalize(() => this._plansLoading.set(false)),
+      map(() => undefined),
+    );
+  }
+
+  /** Загрузка последних планов развития (GET /api/admin/development-plans/recent), по умолчанию 5. */
+  loadRecentDevelopmentPlans(limit = 5): Observable<void> {
+    this._recentPlansLoading.set(true);
+    return this.api.getRecentDevelopmentPlans(limit).pipe(
+      tap((list) => this.store.setRecentDevelopmentPlans(list)),
+      finalize(() => this._recentPlansLoading.set(false)),
       map(() => undefined),
     );
   }

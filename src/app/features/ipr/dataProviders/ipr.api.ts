@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { makeId } from '../../../shared/utils/text';
 import { IprStatus } from '../enums/ipr-status.enum';
@@ -7,6 +7,7 @@ import { TaskPriority } from '../enums/task-priority.enum';
 import { TaskCategory } from '../enums/task-category.enum';
 import {
   DevelopmentPlanDetail,
+  DevelopmentPlanListItem,
   DevelopmentPlansSearchResponse,
   IprPlan,
   SearchDevelopmentPlansRequest,
@@ -42,6 +43,12 @@ export class IprApi {
       '/api/admin/development-plans/search',
       req,
     );
+  }
+
+  /** GET /api/admin/development-plans/recent — последние планы развития (по умолчанию 5). */
+  getRecentDevelopmentPlans(limit = 5): Observable<DevelopmentPlanListItem[]> {
+    const params = new HttpParams().set('limit', limit);
+    return this.http.get<DevelopmentPlanListItem[]>('/api/admin/development-plans/recent', { params });
   }
 
   /** GET /api/admin/development-plans/{id} — детальный план развития (с пунктами). */

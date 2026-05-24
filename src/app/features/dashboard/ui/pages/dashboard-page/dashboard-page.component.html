@@ -18,26 +18,45 @@
     </div>
     <div class="table-wrap">
       <table class="tbl">
-        <thead><tr><th>Сотрудник</th><th>Цель</th><th>Прогресс</th><th>Статус</th></tr></thead>
+        <thead><tr><th>Сотрудник</th><th>Описание</th><th>Прогресс</th><th>Статус</th></tr></thead>
         <tbody>
-          @for (p of plans(); track p.id) {
-            <tr>
-              <td>
-                <div class="cell-emp">
-                  <p-avatar [label]="ini(p.employeeName)" shape="circle" />
-                  <div>
-                    <div class="fw-600">{{ p.employeeName }}</div>
-                    <div class="muted text-sm">{{ p.position }}</div>
+          @if (plansLoading() && !plans().length) {
+            @for (i of [1,2,3,4,5]; track i) {
+              <tr>
+                <td colspan="4">
+                  <div class="skeleton-row">
+                    <p-skeleton shape="circle" size="32px" />
+                    <p-skeleton width="180px" height="14px" />
                   </div>
-                </div>
-              </td>
-              <td class="muted truncate goal-cell">{{ p.goal }}</td>
-              <td>
-                <p-progressBar [value]="p.progress" [showValue]="false" styleClass="dash-bar" />
-                <div class="muted text-sm progress-label">{{ p.progress }}%</div>
-              </td>
-              <td><p-tag [value]="label(p.status)" [severity]="tagSeverity(p.status)" [rounded]="true" /></td>
-            </tr>
+                </td>
+              </tr>
+            }
+          } @else {
+            @for (p of plans(); track p.id) {
+              <tr>
+                <td>
+                  <div class="cell-emp">
+                    <p-avatar [label]="planEmployeeIni(p.employee)" shape="circle" />
+                    <div>
+                      <div class="fw-600">{{ planEmployeeName(p.employee) }}</div>
+                      <div class="muted text-sm">{{ p.employee?.position || ('Год: ' + p.year) }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="muted truncate goal-cell">{{ p.description || '—' }}</td>
+                <td>
+                  <p-progressBar [value]="planProgress(p.completedItemsCount, p.itemsCount)" [showValue]="false" styleClass="dash-bar" />
+                  <div class="muted text-sm progress-label">{{ p.completedItemsCount }}/{{ p.itemsCount }} · {{ planProgress(p.completedItemsCount, p.itemsCount) }}%</div>
+                </td>
+                <td><p-tag [value]="label(p.status)" [severity]="tagSeverity(p.status)" [rounded]="true" /></td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="muted" style="text-align:center; padding:20px">
+                  Нет недавних ИПР
+                </td>
+              </tr>
+            }
           }
         </tbody>
       </table>

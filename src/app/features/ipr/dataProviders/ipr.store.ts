@@ -25,6 +25,11 @@ export class IprStore {
   private _developmentPlans = signal<DevelopmentPlanListItem[]>([]);
   readonly developmentPlans = this._developmentPlans.asReadonly();
 
+  /** Последние планы развития (GET /api/admin/development-plans/recent). */
+  private _recentDevelopmentPlans = signal<DevelopmentPlanListItem[]>([]);
+  readonly recentDevelopmentPlans = this._recentDevelopmentPlans.asReadonly();
+  setRecentDevelopmentPlans(items: DevelopmentPlanListItem[]) { this._recentDevelopmentPlans.set(items); }
+
   private _plansPagination = signal<DevelopmentPlansPagination | null>(null);
   readonly plansPagination = this._plansPagination.asReadonly();
 

@@ -38,7 +38,13 @@ export class DashboardFacade {
     ).length,
   }));
 
-  readonly recentPlans = computed(() => this.iprF.plans().slice(0, 5));
+  /** Последние ИПР с реального бэка (GET /api/admin/development-plans/recent). */
+  readonly recentPlans        = this.iprF.recentDevelopmentPlans;
+  readonly recentPlansLoading = this.iprF.recentPlansLoading;
+
+  loadRecentDevelopmentPlans(limit = 5): Observable<void> {
+    return this.iprF.loadRecentDevelopmentPlans(limit);
+  }
 
   readonly activeSurveys = computed(() =>
     this.surveysF.surveys().filter((s) => s.status === SurveyStatus.Active).slice(0, 3),
