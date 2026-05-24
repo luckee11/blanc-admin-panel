@@ -16,7 +16,11 @@ import {
   DevelopmentPlanGroupDetailAnalytics,
   DevelopmentPlansAnalytics,
 } from '../models/interfaces/development-plan-analytics.interface';
-import { IprTask } from '../models/interfaces/ipr-task.interface';
+import {
+  DevelopmentPlanItemsSearchResponse,
+  IprTask,
+  SearchDevelopmentPlanItemsRequest,
+} from '../models/interfaces/ipr-task.interface';
 
 const SEED_PLANS: IprPlan[] = [
   { id: makeId(), employeeName: 'Дмитрий Орлов', position: 'Старший разработчик', period: '2026 H1', goal: 'Тимлид внутри платформы self-портала', status: IprStatus.InProgress, progress: 65, tasksTotal: 8, tasksDone: 5, mentor: 'Сергей Беляев', startDate: '2026-01-15', endDate: '2026-06-30' },
@@ -75,6 +79,16 @@ export class IprApi {
   /** DELETE /api/admin/development-plans/{id} — удаление плана развития. */
   deleteDevelopmentPlan(id: string): Observable<void> {
     return this.http.delete<void>(`/api/admin/development-plans/${id}`);
+  }
+
+  /** POST /api/admin/development-plans/items/search — поиск задач (пунктов) ИПР с пагинацией. */
+  searchDevelopmentPlanItems(
+    req: SearchDevelopmentPlanItemsRequest,
+  ): Observable<DevelopmentPlanItemsSearchResponse> {
+    return this.http.post<DevelopmentPlanItemsSearchResponse>(
+      '/api/admin/development-plans/items/search',
+      req,
+    );
   }
 
   listPlans(): Observable<IprPlan[]> { return of(SEED_PLANS); }

@@ -1,61 +1,60 @@
-<ui-page-header title="Задачи ИПР" subtitle="Конкретные задачи в рамках планов развития">
-  <p-button label="Новая задача" icon="pi pi-plus" (onClick)="openCreate()" />
+<ui-page-header title="Задачи ИПР" subtitle="Конкретные задачи (пункты) в рамках планов развития">
+  <p-button label="Обновить" icon="pi pi-refresh" severity="secondary" (onClick)="refresh()" />
 </ui-page-header>
 
 <div class="card prim-table-card">
-  <p-table #dt [value]="tasks()" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10,25,50]"
-           [globalFilterFields]="['title','employeeName']"
-           sortMode="single" [showCurrentPageReport]="true"
-           currentPageReportTemplate="Показано {first}–{last} из {totalRecords}" dataKey="id">
+  <p-table [value]="tasks()" [lazy]="true" [loading]="loading()"
+           [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10,25,50]"
+           [totalRecords]="pagination()?.totalCount ?? 0"
+           [showCurrentPageReport]="true"
+           currentPageReportTemplate="Показано {first}–{last} из {totalRecords}"
+           (onLazyLoad)="onLazyLoad($event)" dataKey="id">
     <ng-template pTemplate="caption">
       <div class="table-toolbar">
         <p-iconfield>
           <p-inputicon styleClass="pi pi-search" />
           <input pInputText type="text" placeholder="Поиск по задаче или сотруднику..."
-                 [(ngModel)]="globalFilter"
-                 (input)="dt.filterGlobal($any($event.target).value, 'contains')" />
+                 [(ngModel)]="searchKeyword" (input)="onSearchInput()" />
         </p-iconfield>
         <p-select [options]="statusOptions" [(ngModel)]="selectedStatus"
                   optionLabel="label" optionValue="value" placeholder="Все статусы"
-                  (onChange)="dt.filter(selectedStatus, 'status', 'equals')" />
+                  (onChange)="onFilterChange()" />
         <p-select [options]="priorityOptions" [(ngModel)]="selectedPriority"
                   optionLabel="label" optionValue="value" placeholder="Любой приоритет"
-                  (onChange)="dt.filter(selectedPriority, 'priority', 'equals')" />
+                  (onChange)="onFilterChange()" />
+        <span class="muted text-sm table-count">
+          Всего: <strong style="color:var(--c-text)">{{ pagination()?.totalCount ?? 0 }}</strong>
+        </span>
       </div>
     </ng-template>
     <ng-template pTemplate="header">
       <tr>
-        <th pSortableColumn="title"       style="min-width:220px">Задача <p-sortIcon field="title" /></th>
-        <th pSortableColumn="employeeName" style="min-width:170px">Сотрудник <p-sortIcon field="employeeName" /></th>
-        <th style="min-width:120px">Категория</th>
+        <th style="min-width:240px">Задача</th>
+        <th style="min-width:180px">Сотрудник</th>
+        <th style="min-width:80px">Год</th>
         <th style="min-width:110px">Приоритет</th>
-        <th pSortableColumn="dueDate" style="min-width:120px">Срок <p-sortIcon field="dueDate" /></th>
-        <th style="min-width:110px">Статус</th>
-        <th style="width:90px; text-align:right">Действия</th>
+        <th style="min-width:120px">Срок</th>
+        <th style="min-width:150px">Статус</th>
+        <th style="width:48px"></th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-t>
-      <tr>
+      <tr class="row-link" (click)="openPlan(t.planId)">
         <td>
           <div class="fw-600">{{ t.title }}</div>
-          @if (t.description) { <div class="muted text-sm task-desc">{{ t.description }}</div> }
+          @if (t.expectedResult) { <div class="muted text-sm task-desc">{{ t.expectedResult }}</div> }
         </td>
         <td>
           <div class="cell-emp">
-            <p-avatar [label]="ini(t.employeeName)" shape="circle" />
-            <span>{{ t.employeeName }}</span>
+            <p-avatar [label]="ini(t.employee)" shape="circle" />
+            <span>{{ fullName(t.employee) }}</span>
           </div>
         </td>
-        <td><p-tag [value]="catLabel(t.category)" severity="secondary" [rounded]="true" /></td>
-        <td><p-tag [value]="pLabel(t.priority)"   [severity]="prioritySeverity(t.priority)" [rounded]="true" /></td>
-        <td>{{ fmt(t.dueDate) }}</td>
-        <td><p-tag [value]="label(t.status)" [severity]="statusSeverity(t.status)" [rounded]="true" /></td>
-        <td>
-          <div class="row-actions" style="justify-content:flex-end">
-            <p-button icon="pi pi-pencil" rounded text severity="secondary" size="small" pTooltip="Редактировать" tooltipPosition="top" (onClick)="openEdit(t)" />
-            <p-button icon="pi pi-trash"  rounded text severity="danger"    size="small" pTooltip="Удалить"       tooltipPosition="top" (onClick)="openDelete(t)" />
-          </div>
-        </td>
+        <td>{{ t.year }}</td>
+        <td><p-tag [value]="pLabel(t.priority)" [severity]="prioritySeverity(t.priority)" [rounded]="true" /></td>
+        <td>{{ fmt(t.deadline) }}</td>
+        <td><p-tag [value]="statusLabel(t.status)" [severity]="statusSeverity(t.status)" [rounded]="true" /></td>
+        <td class="td-arrow"><i class="pi pi-chevron-right"></i></td>
       </tr>
     </ng-template>
     <ng-template pTemplate="emptymessage">
@@ -68,35 +67,3 @@
     </ng-template>
   </p-table>
 </div>
-
-<!-- Form modal -->
-<ui-modal [visible]="modal() === 'form'"
-          [title]="editing()?.id ? 'Редактирование задачи' : 'Новая задача ИПР'"
-          size="md" (close)="closeModal()">
-  <div class="form-grid">
-    <div class="field full"><label class="field-label">Название *</label><input pInputText [(ngModel)]="form.title" /></div>
-    <div class="field"><label class="field-label">Сотрудник *</label><input pInputText [(ngModel)]="form.employeeName" /></div>
-    <div class="field">
-      <label class="field-label">Категория</label>
-      <p-select [options]="categoryFormOpts" [(ngModel)]="form.category" optionLabel="label" optionValue="value" [fluid]="true" />
-    </div>
-    <div class="field">
-      <label class="field-label">Приоритет</label>
-      <p-select [options]="priorityFormOpts" [(ngModel)]="form.priority" optionLabel="label" optionValue="value" [fluid]="true" />
-    </div>
-    <div class="field"><label class="field-label">Срок</label><input pInputText type="date" [(ngModel)]="form.dueDate" /></div>
-    <div class="field">
-      <label class="field-label">Статус</label>
-      <p-select [options]="statusFormOpts" [(ngModel)]="form.status" optionLabel="label" optionValue="value" [fluid]="true" />
-    </div>
-    <div class="field full"><label class="field-label">Описание</label><textarea pTextarea [(ngModel)]="form.description" [rows]="3" [autoResize]="true"></textarea></div>
-  </div>
-  <ng-container footer>
-    <p-button label="Отмена" severity="secondary" text (onClick)="closeModal()" />
-    <p-button [label]="editing()?.id ? 'Сохранить' : 'Создать'" (onClick)="save()" [disabled]="!canSave()" />
-  </ng-container>
-</ui-modal>
-
-<ui-confirm-delete [visible]="modal() === 'delete'"
-                   [entity]="editing()?.title ?? ''"
-                   (confirm)="doDelete()" (cancel)="closeModal()" />

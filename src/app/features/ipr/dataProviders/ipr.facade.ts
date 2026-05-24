@@ -6,7 +6,10 @@ import {
   IprPlan,
   SearchDevelopmentPlansRequest,
 } from '../models/interfaces/ipr-plan.interface';
-import { IprTask } from '../models/interfaces/ipr-task.interface';
+import {
+  IprTask,
+  SearchDevelopmentPlanItemsRequest,
+} from '../models/interfaces/ipr-task.interface';
 
 @Injectable({ providedIn: 'root' })
 export class IprFacade {
@@ -35,6 +38,11 @@ export class IprFacade {
   private _groupAnalyticsLoading = signal(false);
   readonly groupAnalyticsLoading = this._groupAnalyticsLoading.asReadonly();
 
+  readonly developmentPlanItems = this.store.developmentPlanItems;
+  readonly itemsPagination = this.store.itemsPagination;
+  private _itemsLoading = signal(false);
+  readonly itemsLoading = this._itemsLoading.asReadonly();
+
   constructor() {
     this.loadAll().subscribe();
   }
@@ -45,6 +53,16 @@ export class IprFacade {
     return this.api.searchDevelopmentPlans(req).pipe(
       tap((res) => this.store.setDevelopmentPlans(res)),
       finalize(() => this._plansLoading.set(false)),
+      map(() => undefined),
+    );
+  }
+
+  /** Поиск задач (пунктов) ИПР (POST /api/admin/development-plans/items/search). */
+  searchDevelopmentPlanItems(req: SearchDevelopmentPlanItemsRequest = {}): Observable<void> {
+    this._itemsLoading.set(true);
+    return this.api.searchDevelopmentPlanItems(req).pipe(
+      tap((res) => this.store.setDevelopmentPlanItems(res)),
+      finalize(() => this._itemsLoading.set(false)),
       map(() => undefined),
     );
   }

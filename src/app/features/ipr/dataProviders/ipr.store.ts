@@ -9,7 +9,11 @@ import {
   DevelopmentPlanGroupDetailAnalytics,
   DevelopmentPlansAnalytics,
 } from '../models/interfaces/development-plan-analytics.interface';
-import { IprTask } from '../models/interfaces/ipr-task.interface';
+import {
+  DevelopmentPlanItemListItem,
+  DevelopmentPlanItemsSearchResponse,
+  IprTask,
+} from '../models/interfaces/ipr-task.interface';
 
 export interface DevelopmentPlansPagination {
   currentPage: number;
@@ -61,6 +65,26 @@ export class IprStore {
 
   private _tasks = signal<IprTask[]>([]);
   readonly tasks = this._tasks.asReadonly();
+
+  /** Задачи (пункты) ИПР с бэкенда (POST /api/admin/development-plans/items/search). */
+  private _developmentPlanItems = signal<DevelopmentPlanItemListItem[]>([]);
+  readonly developmentPlanItems = this._developmentPlanItems.asReadonly();
+
+  private _itemsPagination = signal<DevelopmentPlansPagination | null>(null);
+  readonly itemsPagination = this._itemsPagination.asReadonly();
+
+  /** Записать страницу задач из ответа /api/admin/development-plans/items/search. */
+  setDevelopmentPlanItems(res: DevelopmentPlanItemsSearchResponse) {
+    this._developmentPlanItems.set(res.data);
+    this._itemsPagination.set({
+      currentPage:     res.currentPage,
+      pageSize:        res.pageSize,
+      totalCount:      res.totalCount,
+      totalPages:      res.totalPages,
+      hasNextPage:     res.hasNextPage,
+      hasPreviousPage: res.hasPreviousPage,
+    });
+  }
 
   setPlans(items: IprPlan[]) { this._plans.set(items); }
 
