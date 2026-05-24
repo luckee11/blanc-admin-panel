@@ -29,6 +29,12 @@
 :host ::ng-deep .row-link { cursor: pointer; transition: background .12s; }
 :host ::ng-deep .row-link:hover td { background: var(--c-primary-50) !important; }
 
+.td-arrow {
+  text-align: right;
+  color: var(--c-text-muted);
+  font-size: 12px;
+}
+
 .goal-cell { max-width: 240px; }
 .progress-label { margin-top: 4px; }
 .goal-block { margin-bottom: 20px; }

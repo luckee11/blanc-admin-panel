@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, OnDestroy, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnDestroy, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -9,12 +9,9 @@ import { SelectModule } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
 import { AvatarModule } from 'primeng/avatar';
 import { ProgressBarModule } from 'primeng/progressbar';
-import { TooltipModule } from 'primeng/tooltip';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
-import { ConfirmDeleteComponent } from '../../../../../shared/components/confirm-delete/confirm-delete.component';
-import { ToastService } from '../../../../../shared/services/toast.service';
 import { formatDate } from '../../../../../shared/utils/format';
 import { initialsOf } from '../../../../../shared/utils/text';
 import { IprFacade } from '../../../dataProviders/ipr.facade';
@@ -34,9 +31,9 @@ const DEFAULT_PAGE_SIZE = 10;
   imports: [
     FormsModule,
     TableModule, ButtonModule, InputTextModule, SelectModule,
-    TagModule, AvatarModule, ProgressBarModule, TooltipModule,
+    TagModule, AvatarModule, ProgressBarModule,
     IconFieldModule, InputIconModule,
-    PageHeaderComponent, ConfirmDeleteComponent,
+    PageHeaderComponent,
   ],
   templateUrl: './plans.component.html',
   styleUrl: './plans.component.scss',
@@ -45,7 +42,6 @@ const DEFAULT_PAGE_SIZE = 10;
 export class PlansComponent implements OnDestroy {
   private facade     = inject(IprFacade);
   private router     = inject(Router);
-  private toast      = inject(ToastService);
   private destroyRef = inject(DestroyRef);
 
   plans      = this.facade.developmentPlans;
@@ -113,34 +109,6 @@ export class PlansComponent implements OnDestroy {
   /* ===== Детальный просмотр (отдельная страница) ===== */
   openDetail(p: DevelopmentPlanListItem): void {
     this.router.navigate(['/ipr/plans', p.id]);
-  }
-
-  /* ===== Удаление ===== */
-  toDelete = signal<DevelopmentPlanListItem | null>(null);
-  deleting = signal(false);
-
-  openDelete(p: DevelopmentPlanListItem): void { this.toDelete.set(p); }
-  cancelDelete(): void { this.toDelete.set(null); }
-
-  confirmDelete(): void {
-    const plan = this.toDelete();
-    if (!plan) return;
-    this.deleting.set(true);
-    this.facade.deleteDevelopmentPlan(plan.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.deleting.set(false);
-          this.toDelete.set(null);
-          this.toast.success('План удалён', `${this.fullName(plan.employee)} · ${plan.year}`);
-          // Обновляем страницу, чтобы пересчитать пагинацию/тоталы.
-          this.refresh();
-        },
-        error: () => {
-          this.deleting.set(false);
-          this.toast.error('Не удалось удалить план', 'Попробуйте ещё раз');
-        },
-      });
   }
 
   /* ===== Хелперы отображения ===== */

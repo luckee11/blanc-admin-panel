@@ -41,7 +41,7 @@
         <th style="min-width:160px">Прогресс</th>
         <th style="min-width:180px">Сроки</th>
         <th style="min-width:110px">Статус</th>
-        <th style="width:110px; text-align:right">Действия</th>
+        <th style="width:48px"></th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-p>
@@ -64,14 +64,7 @@
         </td>
         <td class="text-sm">{{ fmt(p.startDate) }} — {{ fmt(p.endDate) }}</td>
         <td><p-tag [value]="label(p.status)" [severity]="tagSeverity(p.status)" [rounded]="true" /></td>
-        <td>
-          <div class="row-actions" style="justify-content:flex-end">
-            <p-button icon="pi pi-eye" rounded text severity="secondary" size="small" pTooltip="Просмотр" tooltipPosition="top"
-                      (onClick)="openDetail(p); $event.stopPropagation()" />
-            <p-button icon="pi pi-trash" rounded text severity="danger" size="small" pTooltip="Удалить" tooltipPosition="top"
-                      (onClick)="openDelete(p); $event.stopPropagation()" />
-          </div>
-        </td>
+        <td class="td-arrow"><i class="pi pi-chevron-right"></i></td>
       </tr>
     </ng-template>
     <ng-template pTemplate="emptymessage">
@@ -84,8 +77,3 @@
     </ng-template>
   </p-table>
 </div>
-
-<!-- Подтверждение удаления -->
-<ui-confirm-delete [visible]="toDelete() !== null"
-                   [entity]="'план развития: ' + fullName(toDelete()?.employee) + ' · ' + (toDelete()?.year ?? '')"
-                   (confirm)="confirmDelete()" (cancel)="cancelDelete()" />
