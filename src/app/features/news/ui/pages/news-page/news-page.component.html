@@ -87,11 +87,13 @@
       <span class="muted text-sm">{{ fmt(e.publishDate) }} · {{ e.author }}</span>
     </div>
     <p class="news-body-text">{{ e.body }}</p>
-    <ng-container footer>
+  }
+  <ng-container footer>
+    @if (editing(); as e) {
       <p-button label="Закрыть" severity="secondary" text (onClick)="closeModal()" />
       <p-button label="Редактировать" icon="pi pi-pencil" (onClick)="openEdit(e)" />
-    </ng-container>
-  }
+    }
+  </ng-container>
 </ui-modal>
 
 <ui-confirm-delete [visible]="modal() === 'delete'"

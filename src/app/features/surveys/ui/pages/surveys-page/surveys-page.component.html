@@ -53,11 +53,13 @@
       <div><span>Начало</span><b>{{ fmt(e.startDate) }}</b></div>
       <div><span>Окончание</span><b>{{ fmt(e.endDate) }}</b></div>
     </div>
-    <ng-container footer>
+  }
+  <ng-container footer>
+    @if (editing(); as e) {
       <p-button label="Закрыть" severity="secondary" text (onClick)="closeModal()" />
       <p-button label="Редактировать" icon="pi pi-pencil" (onClick)="openEdit(e)" />
-    </ng-container>
-  }
+    }
+  </ng-container>
 </ui-modal>
 
 <ui-confirm-delete [visible]="modal() === 'delete'"
