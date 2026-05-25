@@ -1,0 +1,60 @@
+<div class="detail-nav">
+  <p-button label="Назад к письмам" icon="pi pi-arrow-left" severity="secondary" text (onClick)="back()" />
+</div>
+
+<ui-page-header title="Создание шаблона письма" subtitle="Форматируемый текст и изображения" />
+
+<div class="card editor-card">
+  <div class="field">
+    <label class="field-label">Название шаблона *</label>
+    <input pInputText [(ngModel)]="name" placeholder="Например: Онбординг нового сотрудника" />
+  </div>
+
+  <div class="field">
+    <label class="field-label">Тема письма *</label>
+    <input pInputText [(ngModel)]="subject" placeholder="Например: Добро пожаловать в Blanc!" />
+  </div>
+
+  <div class="field">
+    <label class="field-label">Описание</label>
+    <input pInputText [(ngModel)]="description" placeholder="Краткое описание шаблона (необязательно)" />
+  </div>
+
+  <div class="field">
+    <label class="field-label">Тело письма *</label>
+    <p-editor [(ngModel)]="body" [style]="{ height: '420px' }">
+      <ng-template pTemplate="header">
+        <span class="ql-formats">
+          <select class="ql-header"></select>
+          <select class="ql-font"></select>
+        </span>
+        <span class="ql-formats">
+          <button type="button" class="ql-bold" aria-label="Жирный"></button>
+          <button type="button" class="ql-italic" aria-label="Курсив"></button>
+          <button type="button" class="ql-underline" aria-label="Подчёркнутый"></button>
+          <button type="button" class="ql-strike" aria-label="Зачёркнутый"></button>
+        </span>
+        <span class="ql-formats">
+          <select class="ql-color"></select>
+          <select class="ql-background"></select>
+        </span>
+        <span class="ql-formats">
+          <button type="button" class="ql-list" value="ordered"></button>
+          <button type="button" class="ql-list" value="bullet"></button>
+          <select class="ql-align"></select>
+        </span>
+        <span class="ql-formats">
+          <button type="button" class="ql-link" aria-label="Ссылка"></button>
+          <button type="button" class="ql-image" aria-label="Изображение"></button>
+          <button type="button" class="ql-clean" aria-label="Очистить формат"></button>
+        </span>
+      </ng-template>
+    </p-editor>
+    <div class="field-hint">Жирный, курсив, списки, цвет, вставка изображений и ссылок. Используйте {{ '{{name}}' }} для подстановки имени.</div>
+  </div>
+
+  <div class="editor-actions">
+    <p-button label="Отмена" severity="secondary" text (onClick)="back()" />
+    <p-button label="Сохранить шаблон" icon="pi pi-check" [loading]="saving()" (onClick)="save()" [disabled]="!canSave()" />
+  </div>
+</div>

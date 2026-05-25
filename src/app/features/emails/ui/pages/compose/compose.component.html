@@ -1,0 +1,85 @@
+<div class="detail-nav">
+  <p-button label="Назад к письмам" icon="pi pi-arrow-left" severity="secondary" text (onClick)="back()" />
+</div>
+
+<ui-page-header title="Написать письмо" subtitle="Выберите шаблон и аудиторию для рассылки" />
+
+<div class="compose-grid">
+  <!-- Настройки -->
+  <section class="card compose-settings">
+    <div class="field">
+      <label class="field-label">Шаблон письма *</label>
+      <p-select [options]="templates()" [ngModel]="selectedTemplateId()"
+                (ngModelChange)="selectedTemplateId.set($event)"
+                optionLabel="name" optionValue="id" [fluid]="true"
+                placeholder="Выберите шаблон" appendTo="body" />
+      @if (!templates().length) {
+        <div class="field-hint">
+          Шаблонов нет. <a class="link" (click)="back()">Создайте шаблон</a> на странице писем.
+        </div>
+      }
+    </div>
+
+    <div class="field">
+      <label class="field-label">Кому отправить *</label>
+      <p-select [options]="audienceOptions()" [ngModel]="selectedAudience()"
+                (ngModelChange)="selectedAudience.set($event)"
+                optionLabel="label" optionValue="value" [fluid]="true"
+                placeholder="Выберите аудиторию" appendTo="body" />
+    </div>
+
+    <div class="field">
+      <label class="field-label">Когда отправить</label>
+      <div class="send-options">
+        <label class="send-opt" [class.active]="sendMode === 'now'">
+          <p-radioButton name="sendMode" value="now" [(ngModel)]="sendMode" inputId="send-now" />
+          <div>
+            <div class="fw-600"><i class="pi pi-send" style="font-size:13px"></i> Сразу</div>
+            <div class="muted text-sm">Письмо уйдёт сразу</div>
+          </div>
+        </label>
+        <label class="send-opt" [class.active]="sendMode === 'schedule'">
+          <p-radioButton name="sendMode" value="schedule" [(ngModel)]="sendMode" inputId="send-schedule" />
+          <div>
+            <div class="fw-600"><i class="pi pi-calendar" style="font-size:13px"></i> По расписанию</div>
+            <div class="muted text-sm">Выбрать дату и время</div>
+          </div>
+        </label>
+      </div>
+      @if (sendMode === 'schedule') {
+        <input pInputText type="datetime-local" [(ngModel)]="scheduledAt" style="margin-top:8px;width:100%" />
+      }
+    </div>
+
+    @if (selectedAudienceOption(); as aud) {
+      <div class="preview-banner">
+        <i class="pi pi-users"></i>
+        <span class="preview-text">
+          Будет отправлено <strong>{{ aud.count }}</strong> получателям ·
+          <span class="muted">{{ aud.label }}</span>
+        </span>
+      </div>
+    }
+
+    <p-button [label]="sendMode === 'schedule' ? 'Запланировать' : 'Отправить'"
+              [icon]="sendMode === 'schedule' ? 'pi pi-calendar' : 'pi pi-send'" styleClass="send-btn"
+              [loading]="sending()" [disabled]="!canSend()" (onClick)="send()" />
+  </section>
+
+  <!-- Превью -->
+  <section class="card compose-preview">
+    <div class="card-header"><h3>Превью письма</h3></div>
+    @if (selectedTemplate(); as t) {
+      <div class="mail-frame">
+        <div class="mail-subject">{{ t.subject }}</div>
+        <div class="ql-editor mail-body" [innerHTML]="t.body"></div>
+      </div>
+    } @else {
+      <div class="empty-state" style="padding:56px 20px">
+        <div class="icon-wrap"><i class="pi pi-envelope" style="font-size:22px"></i></div>
+        <h3>Выберите шаблон</h3>
+        <p>Здесь появится превью письма.</p>
+      </div>
+    }
+  </section>
+</div>

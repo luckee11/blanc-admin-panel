@@ -107,6 +107,24 @@ export const routes: Routes = [
           import('./features/emails/ui/pages/emails-page/emails-page.component')
             .then((m) => m.EmailsPageComponent),
       },
+      {
+        path: 'emails/compose',
+        loadComponent: () =>
+          import('./features/emails/ui/pages/compose/compose.component')
+            .then((m) => m.ComposeComponent),
+      },
+      {
+        path: 'emails/templates/new',
+        loadComponent: () =>
+          import('./features/emails/ui/pages/template-editor/template-editor.component')
+            .then((m) => m.TemplateEditorComponent),
+      },
+      {
+        path: 'emails/templates/:id',
+        loadComponent: () =>
+          import('./features/emails/ui/pages/template-view/template-view.component')
+            .then((m) => m.TemplateViewComponent),
+      },
     ],
   },
   { path: '**', redirectTo: 'dashboard' },

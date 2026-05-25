@@ -1,0 +1,30 @@
+<div class="detail-nav">
+  <p-button label="Назад к письмам" icon="pi pi-arrow-left" severity="secondary" text (onClick)="back()" />
+  @if (template(); as t) {
+    <p-button label="Удалить шаблон" icon="pi pi-trash" severity="danger" text (onClick)="confirmVisible.set(true)" />
+  }
+</div>
+
+@if (template(); as t) {
+  <ui-page-header [title]="t.name" [subtitle]="t.description || 'Шаблон письма'" />
+  <div class="card template-meta">
+    <div class="info-row"><span>Тема</span><b>{{ t.subject }}</b></div>
+    @if (t.createdAt) { <div class="info-row"><span>Создан</span><b>{{ fmt(t.createdAt) }}</b></div> }
+  </div>
+  <div class="card template-render-card">
+    <div class="ql-editor template-render" [innerHTML]="t.body"></div>
+  </div>
+} @else {
+  <div class="empty-state" style="padding:80px 20px">
+    <div class="icon-wrap"><i class="pi pi-file-edit" style="font-size:24px"></i></div>
+    <h3>Шаблон не найден</h3>
+    <p>Возможно, он был удалён.</p>
+    <div style="margin-top:16px">
+      <p-button label="К письмам" icon="pi pi-arrow-left" severity="secondary" (onClick)="back()" />
+    </div>
+  </div>
+}
+
+<ui-confirm-delete [visible]="confirmVisible()"
+                   [entity]="'шаблон ' + (template()?.name ?? '')"
+                   (confirm)="confirmDelete()" (cancel)="confirmVisible.set(false)" />

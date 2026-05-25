@@ -53,7 +53,11 @@
         <td>{{ h.position }}</td>
         <td class="muted">{{ h.squadName }}</td>
         <td>
-          <p-tag [value]="h.status" [severity]="tagSeverity(h.status)" [rounded]="true" />
+          @if (h.status) {
+            <p-tag [value]="h.status" [severity]="tagSeverity(h.status)" [rounded]="true" />
+          } @else {
+            &mdash;
+          }
         </td>
         <td class="td-arrow">
           <i class="pi pi-chevron-right"></i>

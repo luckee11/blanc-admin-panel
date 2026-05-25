@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { EmailMessage } from '../models/interfaces/email-message.interface';
+import { EmailTemplate } from '../models/interfaces/email-template.interface';
 
 @Injectable({ providedIn: 'root' })
 export class EmailsStore {
@@ -10,4 +11,12 @@ export class EmailsStore {
   add(e: EmailMessage) { this._items.update((l) => [e, ...l]); }
   update(e: EmailMessage) { this._items.update((l) => l.map((x) => x.id === e.id ? e : x)); }
   remove(id: string) { this._items.update((l) => l.filter((x) => x.id !== id)); }
+
+  /* ===== Шаблоны ===== */
+  private _templates = signal<EmailTemplate[]>([]);
+  readonly templates = this._templates.asReadonly();
+
+  setTemplates(items: EmailTemplate[]) { this._templates.set(items); }
+  addTemplate(t: EmailTemplate) { this._templates.update((l) => [t, ...l]); }
+  removeTemplate(id: string) { this._templates.update((l) => l.filter((x) => x.id !== id)); }
 }

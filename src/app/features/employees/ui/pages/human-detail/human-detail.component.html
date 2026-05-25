@@ -58,7 +58,9 @@
         <h1 class="hero-name">{{ fullName() }}</h1>
         <div class="hero-position muted">{{ h.position }}</div>
         <div class="hero-badges">
-          <p-tag [value]="h.status" [severity]="tagSeverity(h.status)" [rounded]="true" />
+          @if (h.status) {
+            <p-tag [value]="h.status" [severity]="tagSeverity(h.status)" [rounded]="true" />
+          }
           @for (sq of h.squads; track sq.id) {
             <span class="badge badge-info">{{ sq.name }}</span>
           }
@@ -139,7 +141,7 @@
     </div>
 
     <!-- Коллеги -->
-    @if (h.teammates?.length) {
+    @if (h.teammates.length) {
       <div class="card info-card full-width">
         <div class="card-header"><h3>Коллеги ({{ h.teammates.length }})</h3></div>
         <div class="card-body teammates-grid">

@@ -1,8 +1,35 @@
 <ui-page-header title="Письма" subtitle="Корпоративные рассылки сотрудникам">
-  <p-button label="Написать письмо" icon="pi pi-send" (onClick)="openCreate()" />
+  <p-button label="Создать шаблон письма" icon="pi pi-file-edit" severity="secondary" (onClick)="openCreateTemplate()" />
+  <p-button label="Написать письмо" icon="pi pi-send" (onClick)="openCompose()" />
 </ui-page-header>
 
 <app-email-stats [emails]="emails()" style="display:block;margin-bottom:16px" />
+
+<!-- Шаблоны писем -->
+<section class="card templates-card">
+  <div class="card-header">
+    <h3>Шаблоны писем ({{ templates().length }})</h3>
+    <p-button label="Новый шаблон" icon="pi pi-plus" size="small" severity="secondary" (onClick)="openCreateTemplate()" />
+  </div>
+  <div class="templates-grid">
+    @for (t of templates(); track t.id) {
+      <div class="template-card">
+        <div class="template-top">
+          <div class="template-icon"><i class="pi pi-file-edit" style="font-size:15px"></i></div>
+          <div class="template-name fw-600 truncate">{{ t.name }}</div>
+        </div>
+        <div class="muted text-sm truncate template-subject">{{ t.subject }}</div>
+        <div class="template-preview" [innerHTML]="t.body"></div>
+        <div class="template-actions">
+          <p-button label="Открыть" icon="pi pi-eye" size="small" severity="secondary" text (onClick)="openViewTemplate(t)" />
+          <p-button icon="pi pi-trash" size="small" severity="danger" text rounded pTooltip="Удалить" tooltipPosition="top" (onClick)="deleteTemplate(t)" />
+        </div>
+      </div>
+    } @empty {
+      <div class="muted text-sm" style="padding:8px 4px">Шаблонов пока нет. Создайте первый — с форматированием и изображениями.</div>
+    }
+  </div>
+</section>
 
 <div class="card prim-table-card">
   <p-table #dt [value]="emails()" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10,25,50]"
@@ -144,13 +171,15 @@
     <div class="mail-preview">
       <p class="mail-body">{{ e.body }}</p>
     </div>
-    <ng-container footer>
+  }
+  <ng-container footer>
+    @if (editing(); as e) {
       <p-button label="Закрыть" severity="secondary" text (onClick)="closeModal()" />
       @if (e.status !== EmailStatus.Sent) {
         <p-button label="Редактировать" icon="pi pi-pencil" (onClick)="openEdit(e)" />
       }
-    </ng-container>
-  }
+    }
+  </ng-container>
 </ui-modal>
 
 <ui-confirm-delete [visible]="modal() === 'delete'"

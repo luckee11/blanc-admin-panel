@@ -11,12 +11,15 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { TooltipModule } from 'primeng/tooltip';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { Router } from '@angular/router';
 import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { ConfirmDeleteComponent } from '../../../../../shared/components/confirm-delete/confirm-delete.component';
+import { ToastService } from '../../../../../shared/services/toast.service';
 import { formatDateTime } from '../../../../../shared/utils/format';
 import { EmailsFacade } from '../../../dataProviders/emails.facade';
 import { EmailMessage } from '../../../models/interfaces/email-message.interface';
+import { EmailTemplate } from '../../../models/interfaces/email-template.interface';
 import { EmailStatus } from '../../../enums/email-status.enum';
 import { SendMode } from '../../../models/types/emails.types';
 import { EmailStatsComponent } from '../../widgets/email-stats/email-stats.component';
@@ -37,10 +40,13 @@ import { getEmailStatusLabel } from '../../../utils/functions/emails.functions';
 })
 export class EmailsPageComponent {
   private facade     = inject(EmailsFacade);
+  private toast      = inject(ToastService);
+  private router     = inject(Router);
   private destroyRef = inject(DestroyRef);
 
   audiences = this.facade.audiences;
   emails = this.facade.emails;
+  templates = this.facade.templates;
   globalFilter = '';
 
   statusOptions = [
@@ -72,12 +78,8 @@ export class EmailsPageComponent {
     if (a) { this.form.recipients = a.label; this.form.recipientCount = a.count; }
   }
 
-  openCreate() {
-    this.form = this.empty();
-    this.audienceKey = 'all';
-    this.sendMode = 'now';
-    this.editing.set(null);
-    this.modal.set('form');
+  openCompose() {
+    this.router.navigate(['/emails/compose']);
   }
   openEdit(e: EmailMessage) {
     this.form = { ...e };
@@ -90,6 +92,21 @@ export class EmailsPageComponent {
   openView(e: EmailMessage) { this.editing.set(e); this.modal.set('view'); }
   openDelete(e: EmailMessage) { this.editing.set(e); this.modal.set('delete'); }
   closeModal() { this.modal.set(null); this.editing.set(null); }
+
+  /* ===== Шаблоны письма (отдельные страницы) ===== */
+  openCreateTemplate() {
+    this.router.navigate(['/emails/templates/new']);
+  }
+
+  openViewTemplate(t: EmailTemplate) {
+    this.router.navigate(['/emails/templates', t.id]);
+  }
+
+  deleteTemplate(t: EmailTemplate) {
+    this.facade.deleteTemplate(t.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.toast.success('Шаблон удалён', t.name));
+  }
 
   saveAsDraft() {
     this.form.status = EmailStatus.Draft;

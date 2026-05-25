@@ -9,7 +9,6 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { InputTextModule } from 'primeng/inputtext';
 import { AutoCompleteModule, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { ConfirmDeleteComponent } from '../../../../../shared/components/confirm-delete/confirm-delete.component';
-import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
 import { ToastService } from '../../../../../shared/services/toast.service';
 import { formatDate } from '../../../../../shared/utils/format';
@@ -39,7 +38,7 @@ type EditForm = {
   imports: [
     FormsModule,
     ButtonModule, TagModule, AvatarModule, SkeletonModule, InputTextModule, AutoCompleteModule,
-    ConfirmDeleteComponent, PageHeaderComponent, ModalComponent,
+    ConfirmDeleteComponent, ModalComponent,
   ],
   templateUrl: './human-detail.component.html',
   styleUrl: './human-detail.component.scss',

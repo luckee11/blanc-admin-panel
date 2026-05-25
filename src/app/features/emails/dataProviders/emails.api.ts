@@ -1,7 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { makeId } from '../../../shared/utils/text';
 import { EmailMessage } from '../models/interfaces/email-message.interface';
+import { EmailTemplate } from '../models/interfaces/email-template.interface';
 import { EmailStatus } from '../enums/email-status.enum';
 
 const SEED: EmailMessage[] = [
@@ -14,8 +16,26 @@ const SEED: EmailMessage[] = [
 
 @Injectable({ providedIn: 'root' })
 export class EmailsApi {
+  private http = inject(HttpClient);
+
   list(): Observable<EmailMessage[]> { return of(SEED); }
   create(e: Omit<EmailMessage, 'id'>): Observable<EmailMessage> { return of({ ...e, id: makeId() }); }
   update(e: EmailMessage): Observable<EmailMessage> { return of(e); }
   remove(_id: string): Observable<void> { return of(undefined); }
+
+  /* ===== Шаблоны писем ===== */
+  /** GET /api/admin/emails — шаблоны писем. */
+  listTemplates(): Observable<EmailTemplate[]> {
+    return this.http.get<EmailTemplate[]>('/api/admin/emails');
+  }
+
+  /** POST /api/admin/emails — создание шаблона письма. */
+  createTemplate(t: Omit<EmailTemplate, 'id'>): Observable<EmailTemplate> {
+    return this.http.post<EmailTemplate>('/api/admin/emails', t);
+  }
+
+  /** DELETE /api/admin/emails/{id} — удаление шаблона письма. */
+  removeTemplate(id: string): Observable<void> {
+    return this.http.delete<void>(`/api/admin/emails/${id}`);
+  }
 }

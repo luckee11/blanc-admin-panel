@@ -1,0 +1,89 @@
+.detail-nav { margin-bottom: 12px; }
+
+.compose-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 960px) {
+  .compose-grid { grid-template-columns: 1fr; }
+}
+
+.compose-settings {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.preview-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--c-primary-50);
+  border-radius: 10px;
+  font-size: 14px;
+
+  i {
+    font-size: 16px;
+    color: var(--c-primary);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+}
+
+.preview-text {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+:host ::ng-deep .send-btn { width: 100%; justify-content: center; }
+
+.send-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 600px) { .send-options { grid-template-columns: 1fr; } }
+
+.send-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--c-border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+
+  &:hover { border-color: var(--c-border-strong); }
+  &.active {
+    border-color: var(--c-primary-500);
+    background: rgba(37, 99, 235, .04);
+  }
+  input { margin-top: 2px; accent-color: var(--c-primary-500); }
+}
+
+.compose-preview { min-height: 320px; }
+
+.mail-frame {
+  margin: 16px;
+  border: 1px solid var(--c-divider);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.mail-subject {
+  padding: 14px 18px;
+  font-size: 16px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--c-divider);
+  background: var(--c-surface-alt);
+}
+.mail-body {
+  padding: 18px;
+  :where(img) { max-width: 100%; height: auto; }
+}
